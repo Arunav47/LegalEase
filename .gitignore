@@ -30,6 +30,8 @@ venv/
 # Test files
 .pytest_cache/
 
+.poetry/
+
 # Build artifacts
 dist/
 build/
