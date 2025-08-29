@@ -15,5 +15,13 @@ To install LegalEase, follow these steps:
 2. Install the required packages
     ```bash
     pip install poetry
+    ```
+3. Fork the repository and the clone your forked repository
+    ```bash
+    git clone https://github.com/yourusername/LegalEase.git
+    cd LegalEase
+    ```
+4. Install the dependencies
+    ```bash
     poetry install
     ```
