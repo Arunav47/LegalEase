@@ -1,0 +1,83 @@
+services:
+  api: &main_app
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    image: backend:${BACKEND_VERSION:-latest}
+    restart: always
+    env_file:
+      - .env
+    labels:
+      # Enables traefik for this container.
+      - traefik.enable=true
+      - traefik.http.routers.backend.rule=Host(`${BACKEND_TRAEFIK_HOST:-backend.localhost}`)
+      - traefik.http.routers.backend.entrypoints=http
+      - traefik.http.routers.backend.service=backend
+      - traefik.http.services.backend.loadbalancer.server.port=${BACKEND_PORT:-8000}
+    networks:
+      - default
+      - traefik-shared
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment:
+      BACKEND_HOST: 0.0.0.0
+      BACKEND_DB_HOST: backend-db
+      BACKEND_DB_PORT: 27017
+      BACKEND_DB_USER: backend
+      BACKEND_DB_PASS: backend
+      BACKEND_DB_BASE: admin
+      BACKEND_REDIS_HOST: backend-redis
+  db:
+    image: mongo:7.0
+    hostname: backend-db
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: "backend"
+      MONGO_INITDB_ROOT_PASSWORD: "backend"
+    command: "mongod"
+    volumes:
+      - backend-db-data:/data/db
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/test --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 40
+
+  migrator:
+    image: backend:${BACKEND_VERSION:-latest}
+    restart: "no"
+    environment:
+      BACKEND_DB_HOST: backend-db
+      BACKEND_DB_PORT: 27017
+      BACKEND_DB_USER: backend
+      BACKEND_DB_PASS: backend
+      BACKEND_DB_BASE: backend
+    depends_on:
+      db:
+        condition: service_healthy
+
+  redis:
+    image: bitnami/redis:6.2.5
+    hostname: "backend-redis"
+    restart: always
+    environment:
+      ALLOW_EMPTY_PASSWORD: "yes"
+    healthcheck:
+      test: redis-cli ping
+      interval: 1s
+      timeout: 3s
+      retries: 50
+
+
+
+volumes:
+  backend-db-data:
+    name: backend-db-data
+
+networks:
+  # Network for traefik.
+  traefik-shared:
+    name: traefik-shared
