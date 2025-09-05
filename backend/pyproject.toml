@@ -22,6 +22,11 @@ ujson = "^5.10.0"
 redis = {version = "^5.2.1", extras = ["hiredis"]}
 httptools = "^0.6.4"
 pymongo = "^4.10.1"
+pytesseract = "^0.3.10"
+pillow = "^10.0.0"
+pymupdf = "^1.23.0"
+google-cloud-aiplatform = "^1.38.0"
+python-dotenv = "^1.0.0"
 
 
 [tool.poetry.group.dev.dependencies]
