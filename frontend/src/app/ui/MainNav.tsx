@@ -1,4 +1,3 @@
-
 "use client";
 
 import {
@@ -19,7 +18,7 @@ export function MainNav() {
     const navItems = [
         { name: "Features", link: "#features" },
         { name: "Pricing", link: "#pricing" },
-        { name: "Contact", link: "#contact" },
+        { name: "Developers", link: "#Developers" },
     ];
 
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -36,6 +35,7 @@ export function MainNav() {
                         <NavbarButton
                             onClick={() => router.push("/auth/login")}
                             variant="primary"
+                            className="text-lg px-6 py-3"
                         >
                             Login
                         </NavbarButton>
@@ -74,13 +74,6 @@ export function MainNav() {
                                 className="w-full"
                             >
                                 Login
-                            </NavbarButton>
-                            <NavbarButton
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                variant="primary"
-                                className="w-full"
-                            >
-                                Book a call
                             </NavbarButton>
                         </div>
                     </MobileNavMenu>

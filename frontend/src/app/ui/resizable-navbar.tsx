@@ -138,7 +138,12 @@ export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
                             className="absolute inset-0 h-full w-full rounded-full bg-black"
                         />
                     )}
-                    <span className="relative z-20 text-black hover:text-white">
+                    <span
+                        className={cn(
+                            "relative z-20 transition-all duration-200",
+                            hovered === idx ? "text-white" : "text-black"
+                        )}
+                    >
                         {item.name}
                     </span>
                 </a>
@@ -288,3 +293,10 @@ export const NavbarButton = ({
         </Tag>
     );
 };
+
+<button
+    className="bg-white hover:bg-gray-100 text-blue-700 font-semibold mx-2 py-4 px-8 border border-white hover:border-transparent rounded-md transition-all"
+    type="button"
+>
+    Login
+</button>
