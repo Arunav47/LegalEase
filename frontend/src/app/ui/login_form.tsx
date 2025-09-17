@@ -1,16 +1,19 @@
-"use client"
+"use client";
 
 import Link from "next/link";
-import { Mail, Lock, User, CheckCircle } from "lucide-react";
+import { Mail, Lock, User, CheckCircle, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
-import { motion } from "motion/react"
-
+import { motion } from "motion/react";
+import { auth } from "@/lib/firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 export default function LoginForm() {
     const [formData, setFormData] = useState({
         email: '',
         password: ''
     });
+    const [passwordVisible, setPasswordVisible] = useState(false);
+    const [error, setError] = useState("");
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
@@ -19,13 +22,20 @@ export default function LoginForm() {
         });
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Form submitted:', formData);
+        try {
+            await signInWithEmailAndPassword(auth, formData.email, formData.password);
+            console.log("Login successful");
+            window.location.href = "/home";
+        } catch (err: any) {
+            console.error("Firebase Error:", err.message);
+            setError("Unable to log in. Check email or password.");
+        }
     };
 
     return (
-        <motion.div 
+        <motion.div
             className="w-full max-w-md p-8 rounded-xl bg-white shadow-xl border border-gray-100"
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -36,9 +46,8 @@ export default function LoginForm() {
                     <User className="text-blue-600" size={24} />
                 </div>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="space-y-5">
-                
                 {/* Email Field */}
                 <div className="space-y-2">
                     <label htmlFor="email" className="text-sm font-medium text-gray-700 block">Email Address</label>
@@ -64,7 +73,7 @@ export default function LoginForm() {
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
                         <input
                             className="border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 py-3 rounded-lg text-gray-900 transition duration-150"
-                            type="password"
+                            type={passwordVisible ? "text" : "password"}
                             id="password"
                             name="password"
                             value={formData.password}
@@ -72,6 +81,13 @@ export default function LoginForm() {
                             placeholder="••••••••"
                             required
                         />
+                        <button
+                            type="button"
+                            onClick={() => setPasswordVisible(!passwordVisible)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        >
+                            {passwordVisible ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
                     </div>
                     <div className="text-right">
                         <a
@@ -106,6 +122,8 @@ export default function LoginForm() {
                     Sign Up
                 </Link>
             </div>
+
+            {error && <p className="text-red-500 text-sm mt-4">{error}</p>}
         </motion.div>
     );
 }
