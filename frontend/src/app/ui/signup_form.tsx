@@ -1,10 +1,11 @@
-"use client"
+"use client";
 
 import Link from "next/link";
-import { Mail, Lock, User, CheckCircle } from "lucide-react";
+import { Mail, Lock, User, CheckCircle, Eye, EyeOff, Info } from "lucide-react";
 import { useState } from "react";
-import { motion } from "motion/react"
-
+import { motion } from "motion/react";
+import { auth } from "@/lib/firebase";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 
 export default function SignUpForm() {
     const [formData, setFormData] = useState({
@@ -12,6 +13,16 @@ export default function SignUpForm() {
         email: '',
         password: ''
     });
+    const [passwordVisible, setPasswordVisible] = useState(false);
+    const [error, setError] = useState("");
+
+    const validatePassword = (password: string) => {
+        const minLength = /.{8,}/;
+        const hasUppercase = /[A-Z]/;
+        const hasLowercase = /[a-z]/;
+        const hasNumber = /[0-9]/;
+        return minLength.test(password) && hasUppercase.test(password) && hasLowercase.test(password) && hasNumber.test(password);
+    };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
@@ -20,13 +31,25 @@ export default function SignUpForm() {
         });
     };
 
-    const handleSubmit = (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        console.log('Form submitted:', formData);
+        if (!validatePassword(formData.password)) {
+            setError("Password must be at least 8 characters long, include an uppercase letter, a lowercase letter, and a number.");
+            return;
+        }
+        try {
+            await createUserWithEmailAndPassword(auth, formData.email, formData.password);
+            console.log("Signup successful");
+            await signInWithEmailAndPassword(auth, formData.email, formData.password);
+            window.location.href = "/home";
+        } catch (err: any) {
+            console.error("Firebase Error:", err.message);
+            setError("Unable to create account. Please try again.");
+        }
     };
 
     return (
-        <motion.div 
+        <motion.div
             className="w-full max-w-md p-8 rounded-xl bg-white shadow-xl border border-gray-100"
             initial={{ opacity: 0, scale: 0 }}
             animate={{ opacity: 1, scale: 1 }}
@@ -37,7 +60,7 @@ export default function SignUpForm() {
                     <User className="text-blue-600" size={24} />
                 </div>
             </div>
-            
+
             <form onSubmit={handleSubmit} className="space-y-5">
                 {/* Username Field */}
                 <div className="space-y-2">
@@ -56,7 +79,7 @@ export default function SignUpForm() {
                         />
                     </div>
                 </div>
-                
+
                 {/* Email Field */}
                 <div className="space-y-2">
                     <label htmlFor="email" className="text-sm font-medium text-gray-700 block">Email Address</label>
@@ -82,7 +105,7 @@ export default function SignUpForm() {
                         <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
                         <input
                             className="border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 py-3 rounded-lg text-gray-900 transition duration-150"
-                            type="password"
+                            type={passwordVisible ? "text" : "password"}
                             id="password"
                             name="password"
                             value={formData.password}
@@ -90,6 +113,13 @@ export default function SignUpForm() {
                             placeholder="••••••••"
                             required
                         />
+                        <button
+                            type="button"
+                            onClick={() => setPasswordVisible(!passwordVisible)}
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                        >
+                            {passwordVisible ? <EyeOff size={18} /> : <Eye size={18} />}
+                        </button>
                     </div>
                     <div className="text-right">
                         <a
@@ -99,6 +129,17 @@ export default function SignUpForm() {
                             Forgot Password?
                         </a>
                     </div>
+                </div>
+
+                {/* Password Requirements */}
+                <div className="flex items-start space-x-2 bg-blue-50 p-4 rounded-lg border border-blue-200">
+                    <Info className="text-blue-600" size={20} />
+                    <ul className="text-sm text-gray-700 list-disc pl-5">
+                        <li>At least 8 characters long</li>
+                        <li>At least one uppercase letter</li>
+                        <li>At least one lowercase letter</li>
+                        <li>At least one number</li>
+                    </ul>
                 </div>
 
                 <div className="flex items-center space-x-2">
@@ -116,6 +157,9 @@ export default function SignUpForm() {
                     </button>
                 </div>
             </form>
+
+            {/* Error Message */}
+            {error && <p className="text-red-500 text-sm mt-4">{error}</p>}
 
             {/* Login Link */}
             <div className="text-center mt-6 border-t border-gray-100 pt-4">
