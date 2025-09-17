@@ -19,13 +19,31 @@ const items = [
         gradient: 'linear-gradient(180deg, #10B981, #000)',
         url: 'https://www.linkedin.com/in/pragati-kalwar-786b09257/',
     },
+    {
+        image: '/images/suraj.jpeg',
+        title: 'Suraj Gupta',
+        subtitle: 'RAG Expert',
+        handle: '',
+        borderColor: '#e95d17ff',
+        gradient: 'linear-gradient(145deg, #3B82F6, #000)',
+        url: 'https://www.linkedin.com/in/suraj-gupta-427321250/',
+    },
+    {
+        image: '/images/nilesh.jpeg',
+        title: 'Nilesh Baheti',
+        subtitle: 'Developer',
+        handle: '',
+        borderColor: '#b910a5ff',
+        gradient: 'linear-gradient(180deg, #b910b9ff, #000)',
+        url: 'https://www.linkedin.com/in/nilesh-baheti-640b87257/',
+    },
 ];
 
 const DevelopersPage = () => {
     return (
         <div className="bg-white">
             <MainNav />  {/* Include the navbar here */}
-            <div style={{ height: '600px', position: 'relative' }}>
+            <div style={{ minHeight: '800px', position: 'relative' }}>
                 <ChromaGrid
                     items={items}
                     radius={300}

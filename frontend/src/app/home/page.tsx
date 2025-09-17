@@ -1,3 +1,8 @@
+import { MainNav } from "../ui/MainNav";
+
 export default function HomePage() {
-    return <div>Hello, LegalEase!</div>
+    return <div>
+        <MainNav/>
+        Hello, LegalEase!
+        </div>
 }
