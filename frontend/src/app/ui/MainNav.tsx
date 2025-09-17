@@ -16,9 +16,9 @@ import { useRouter } from "next/navigation";
 
 export function MainNav() {
     const navItems = [
-        { name: "Features", link: "#features" },
-        { name: "Pricing", link: "#pricing" },
-        { name: "Developers", link: "#Developers" },
+        { name: "Features", link: "features" },
+        { name: "Pricing", link: "pricing" },
+        { name: "Developers", link: "developers" },
     ];
 
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

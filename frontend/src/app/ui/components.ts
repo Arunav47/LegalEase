@@ -6,3 +6,4 @@ export { OverlayCopy } from './OverlayCopy';
 export { ExampleContent } from './ExampleContent';
 export { Navbar } from './resizable-navbar';
 export { MainNav } from './MainNav';
+export { ChromaGrid } from './ChromaGrid';
