@@ -27,30 +27,49 @@ export default function HomePage() {
     ];
 
     useEffect(() => {
+        // Throttle scroll events to improve performance
+        let ticking = false;
+
         const handleScroll = () => {
-            setScrollY(window.scrollY);
-            if (window.scrollY > 100) {
-                setShowHistory(!showResults);
-            } else {
-                setShowHistory(false);
-                if (showResults && window.scrollY < 50) {
-                    setShowResults(false);
-                }
+            if (!ticking) {
+                window.requestAnimationFrame(() => {
+                    const scrollPos = window.scrollY;
+                    setScrollY(scrollPos);
+
+                    if (scrollPos > 0 && !showResults) {
+                        setShowHistory(true);
+                    } else {
+                        setShowHistory(false);
+                    }
+
+                    if (showResults && scrollPos === 0) {
+                        setShowResults(false);
+                    }
+
+                    ticking = false;
+                });
+                ticking = true;
             }
         };
 
-        window.addEventListener("scroll", handleScroll);
+        window.addEventListener("scroll", handleScroll, { passive: true });
         return () => window.removeEventListener("scroll", handleScroll);
-    }, [showResults]);
+    }, [showResults, showHistory]);
 
     const handleSearch = (query: string) => {
         setSearchQuery(query);
         if (query.trim()) {
             setShowResults(true);
             setShowHistory(false);
+            window.scrollTo({ top: 10, behavior: 'smooth' }); // Small scroll to trigger showing results
         } else {
             setShowResults(false);
         }
+    };
+
+    const toggleHistory = () => {
+        setShowHistory(!showHistory);
+        setShowResults(false);
     };
 
     if (isLoading) {
@@ -68,7 +87,9 @@ export default function HomePage() {
     return (
         <div className="min-h-screen relative overflow-hidden">
             <div className="fixed inset-0 top-40 z-0 will-change-transform">
-                <Threads enableMouseInteraction={true} />
+                <div className="w-full h-full transform-gpu">
+                    <Threads enableMouseInteraction={true} />
+                </div>
             </div>
 
             <div className="relative z-10 min-h-screen">
@@ -88,7 +109,7 @@ export default function HomePage() {
                 </div>
 
                 <div
-                    className={`fixed inset-0 z-20 transition-opacity duration-500 ease-in-out ${showHistory ? 'opacity-100' : 'opacity-0 pointer-events-none'} bg-black bg-opacity-30`}
+                    className={`fixed inset-0 z-20 transition-all duration-300 ease-in-out ${showHistory ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-full pointer-events-none'} bg-black bg-opacity-30`}
                 >
                     <div className="h-full overflow-y-auto pt-20 pb-8">
                         <div className="max-w-4xl mx-auto px-4">
@@ -117,7 +138,7 @@ export default function HomePage() {
                 </div>
 
                 <div
-                    className={`fixed inset-0 z-20 transition-opacity duration-500 ease-in-out ${showResults ? 'opacity-100' : 'opacity-0 pointer-events-none'} bg-black bg-opacity-30`}
+                    className={`fixed inset-0 z-20 transition-all duration-300 ease-in-out ${showResults ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-full pointer-events-none'} bg-black bg-opacity-30`}
                 >
                     <div className="h-full overflow-y-auto pt-20 pb-8">
                         <div className="max-w-4xl mx-auto px-4">
@@ -139,14 +160,13 @@ export default function HomePage() {
 
                 <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-30">
                     <div
-                        className={`bg-white bg-opacity-20 rounded-full px-4 py-2 text-white text-sm transition-opacity duration-300 ${scrollY > 50 || showResults ? 'opacity-0' : 'opacity-100'}`}
+                        className={`bg-white rounded-full px-6 py-3 text-black text-base font-medium transition-opacity duration-300 ${scrollY > 10 || showResults ? 'opacity-0' : 'opacity-100'}`}
                     >
                         Scroll up to view document history
                     </div>
                 </div>
 
-                {/* Spacer for scroll */}
-                <div className="h-screen"></div>
+                <div className="h-20"></div>
             </div>
         </div>
     );
