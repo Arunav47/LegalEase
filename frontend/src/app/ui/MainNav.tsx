@@ -17,15 +17,15 @@ import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
 export function MainNav() {
-    const navItems = [
-        { name: "Features", link: "/" },
-        { name: "Pricing", link: "/pricing" },
-        { name: "Developers", link: "/developers" },
-    ];
-
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const router = useRouter();
+
+    const navItems = [
+        { name: "Features", link: "/" },
+        ...(isLoggedIn ? [{ name: "Home", link: "/home" }] : []),
+        { name: "Developers", link: "/developers" },
+    ];
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (user) => {
