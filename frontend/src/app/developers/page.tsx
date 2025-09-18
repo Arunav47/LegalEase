@@ -11,6 +11,15 @@ const items = [
         url: 'https://www.linkedin.com/in/subham-majumder-7ab09b251/',
     },
     {
+        image: '/images/arunav.jpeg',
+        title: 'Arunav Borthakur',
+        subtitle: 'Developer',
+        handle: '',
+        borderColor: '#10B981',
+        gradient: 'linear-gradient(180deg, #10B981, #000)',
+        url: 'https://www.linkedin.com/in/arunav-borthakur-439017258/',
+    },
+    {
         image: '/images/pragati.jpeg',
         title: 'Pragati Kalwar',
         subtitle: 'Designer',
