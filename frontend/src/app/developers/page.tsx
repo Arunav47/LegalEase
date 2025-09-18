@@ -1,5 +1,4 @@
 import { ChromaGrid } from '@/app/ui/components';
-import { MainNav } from '@/app/ui/components';
 const items = [
     {
         image: '/images/subham.jpeg',
@@ -51,7 +50,6 @@ const items = [
 const DevelopersPage = () => {
     return (
         <div className="bg-white">
-            <MainNav />  {/* Include the navbar here */}
             <div style={{ minHeight: '800px', position: 'relative' }}>
                 <ChromaGrid
                     items={items}
