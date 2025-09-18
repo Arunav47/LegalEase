@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Mail, Lock, User, CheckCircle, Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 import { motion } from "motion/react";
+import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 
@@ -14,6 +15,7 @@ export default function LoginForm() {
     });
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [error, setError] = useState("");
+    const router = useRouter();
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({
@@ -27,7 +29,7 @@ export default function LoginForm() {
         try {
             await signInWithEmailAndPassword(auth, formData.email, formData.password);
             console.log("Login successful");
-            window.location.href = "/home";
+            router.replace("/home"); // Use replace to prevent back navigation
         } catch (err: any) {
             console.error("Firebase Error:", err.message);
             setError("Unable to log in. Check email or password.");
