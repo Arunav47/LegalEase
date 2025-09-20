@@ -11,18 +11,29 @@ import {
     MobileNavToggle,
     MobileNavMenu,
 } from "./resizable-navbar";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
+import { auth } from "@/lib/firebase";
+import { onAuthStateChanged } from "firebase/auth";
 
 export function MainNav() {
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isLoggedIn, setIsLoggedIn] = useState(false);
+    const router = useRouter();
+
     const navItems = [
-        { name: "Features", link: "features" },
-        { name: "Pricing", link: "pricing" },
-        { name: "Developers", link: "developers" },
+        { name: "Features", link: "/" },
+        ...(isLoggedIn ? [{ name: "Home", link: "/home" }] : []),
+        { name: "Developers", link: "/developers" },
     ];
 
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const router = useRouter();
+    useEffect(() => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            setIsLoggedIn(!!user);
+        });
+
+        return () => unsubscribe();
+    }, []);
 
     return (
         <div className="relative w-full">
@@ -32,14 +43,35 @@ export function MainNav() {
                     <NavbarLogo />
                     <NavItems items={navItems} />
                     <div className="flex items-center gap-4">
-                        <NavbarButton
-                            onClick={() => router.push("/auth/login")}
-                            variant="primary"
-                            className="text-lg px-6 py-3"
-                        >
-                            Login
-                        </NavbarButton>
-                        {/* <NavbarButton variant="secondary">Book a call</NavbarButton> */}
+                        {isLoggedIn ? (
+                            <NavbarButton
+                                onClick={() => {
+                                    auth.signOut();
+                                    router.replace("/");
+                                }}
+                                variant="primary"
+                                className="text-lg px-6 py-3"
+                            >
+                                Logout
+                            </NavbarButton>
+                        ) : (
+                            <>
+                                <NavbarButton
+                                    onClick={() => router.push("/auth/login")}
+                                    variant="primary"
+                                    className="text-lg px-6 py-3"
+                                >
+                                    Login
+                                </NavbarButton>
+                                <NavbarButton
+                                    onClick={() => router.push("/auth/signup")}
+                                    variant="primary"
+                                    className="text-lg px-6 py-3"
+                                >
+                                    Sign Up
+                                </NavbarButton>
+                            </>
+                        )}
                     </div>
                 </NavBody>
 
@@ -68,13 +100,42 @@ export function MainNav() {
                             </a>
                         ))}
                         <div className="flex w-full flex-col gap-4">
-                            <NavbarButton
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                variant="primary"
-                                className="w-full"
-                            >
-                                Login
-                            </NavbarButton>
+                            {isLoggedIn ? (
+                                <NavbarButton
+                                    onClick={() => {
+                                        auth.signOut();
+                                        router.replace("/");
+                                        setIsMobileMenuOpen(false);
+                                    }}
+                                    variant="primary"
+                                    className="w-full"
+                                >
+                                    Logout
+                                </NavbarButton>
+                            ) : (
+                                <>
+                                    <NavbarButton
+                                        onClick={() => {
+                                            router.push("/auth/login");
+                                            setIsMobileMenuOpen(false);
+                                        }}
+                                        variant="primary"
+                                        className="w-full"
+                                    >
+                                        Login
+                                    </NavbarButton>
+                                    <NavbarButton
+                                        onClick={() => {
+                                            router.push("/auth/signup");
+                                            setIsMobileMenuOpen(false);
+                                        }}
+                                        variant="primary"
+                                        className="w-full"
+                                    >
+                                        Sign Up
+                                    </NavbarButton>
+                                </>
+                            )}
                         </div>
                     </MobileNavMenu>
                 </MobileNav>
