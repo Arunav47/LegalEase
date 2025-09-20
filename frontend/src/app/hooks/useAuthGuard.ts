@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 
-export function useAuthGuard(requireAuth: boolean = true) {
+export function useAuthGuard(mode: 'protected' | 'auth-only' | 'public' = 'protected') {
     const [isLoading, setIsLoading] = useState(true);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const router = useRouter();
@@ -15,17 +15,18 @@ export function useAuthGuard(requireAuth: boolean = true) {
             setIsAuthenticated(!!user);
             setIsLoading(false);
 
-            if (requireAuth && !user) {
-                // User should be authenticated but isn't - redirect to login
+            if (mode === 'protected' && !user) {
+                // Protected route - redirect to login if not authenticated
                 router.replace("/auth/login");
-            } else if (!requireAuth && user) {
-                // User shouldn't be on auth pages when logged in - redirect to home
+            } else if (mode === 'auth-only' && user) {
+                // Auth-only pages (login/signup) - redirect to home if already authenticated
                 router.replace("/home");
             }
+            // For 'public' mode, no redirects - allow access to everyone
         });
 
         return () => unsubscribe();
-    }, [requireAuth, router]);
+    }, [mode, router]);
 
     return { isLoading, isAuthenticated };
 }
