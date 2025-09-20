@@ -16,7 +16,7 @@ export default function DocumentPage() {
     const [chatMessages, setChatMessages] = useState<Array<{ id: number, text: string, sender: 'user' | 'bot', timestamp: Date }>>([
         {
             id: 1,
-            text: "Hello! I'm your Gemini-powered document assistant. Ask me anything about this document and I'll use Google's advanced AI to help you understand it better.",
+            text: "Hello! I'm your Gemini-powered document assistant. I've analyzed this Agreement for Sale document. Ask me about the seller, buyer, price, timeline, or any specific terms in the agreement.",
             sender: 'bot',
             timestamp: new Date()
         }
@@ -26,80 +26,93 @@ export default function DocumentPage() {
 
     const mockDocumentData = {
         id: params.id,
-        name: "Employment_Agreement_TechCorp_2024.pdf",
+        name: "Agreement_for_Sale_Guwahati_2025.pdf",
         type: "Gemini Deep Analysis",
-        uploadDate: "2024-01-15",
+        uploadDate: "2025-09-20",
         status: "AI Analyzed",
-        summary: "This employment agreement establishes the working relationship between TechCorp Inc. and a Senior Software Engineer. The AI analysis reveals key provisions including competitive compensation ($120,000 base + equity), comprehensive benefits, intellectual property assignments, and standard non-compete clauses. Notable features include remote work flexibility, professional development allowances, and performance-based bonuses. The contract includes robust confidentiality provisions and clear termination procedures with 60-day notice requirements.",
+        summary: "This document is an Agreement for Sale for a residential house. It outlines the terms and conditions for the sale of a property located in Guwahati, Assam. The agreement was made on September 20, 2025, between the seller, Mr. Ramesh Chandra Sharma (the Vendor), and the buyer, Mrs. Anjali Das (the Purchaser). The total sale price is ₹85,00,000, with an initial earnest money payment of ₹10,00,000 already made by the purchaser.",
         keyClauses: [
             {
-                title: "Compensation & Benefits Package",
-                content: "Base salary: $120,000 annually, 15% performance bonus potential, equity participation (0.25%), health/dental/vision coverage, $3,000 professional development budget",
+                title: "Sale and Price",
+                content: "The vendor agrees to sell the house for ₹85,00,000, free from all encumbrances.",
                 type: "financial",
                 importance: "high"
             },
             {
-                title: "Intellectual Property Assignment",
-                content: "All work products, code, inventions, and discoveries made during employment become company property. Employee must disclose pre-existing IP in Schedule A",
-                type: "legal",
-                importance: "critical"
-            },
-            {
-                title: "Non-Disclosure & Confidentiality",
-                content: "Comprehensive NDA covering proprietary information, customer data, business strategies. Obligations continue 3 years post-employment",
-                type: "confidentiality",
+                title: "Earnest Money",
+                content: "The purchaser has paid ₹10,00,000 as earnest money on the date of the agreement. The remaining balance is to be paid when the final conveyance deed is executed.",
+                type: "financial",
                 importance: "high"
             },
             {
-                title: "Termination & Notice Provisions",
-                content: "Either party may terminate with 60 days written notice. Immediate termination allowed for cause. Severance: 2 months salary if terminated without cause",
-                type: "termination",
+                title: "Timeframe",
+                content: "The sale must be completed within three months from the agreement date, with time being of the essence.",
+                type: "timeline",
+                importance: "critical"
+            },
+            {
+                title: "Title Verification",
+                content: "The vendor must provide the property's title deeds to the purchaser's advocate within one week. The advocate then has 15 days to report on the title's clarity.",
+                type: "legal",
+                importance: "high"
+            },
+            {
+                title: "Purchaser's Default",
+                content: "If the purchaser breaks the agreement, the vendor is entitled to forfeit the earnest money and is free to sell the property to someone else.",
+                type: "default",
                 importance: "medium"
             },
             {
-                title: "Remote Work & Flexibility",
-                content: "Hybrid work model: 3 days in office, 2 days remote. Flexible hours between 7 AM - 7 PM core collaboration time. International remote work requires approval",
-                type: "operational",
+                title: "Vendor's Default",
+                content: "If the vendor breaks the agreement, he must refund the earnest money and also pay ₹5,00,000 as liquidated damages to the purchaser.",
+                type: "default",
+                importance: "high"
+            },
+            {
+                title: "Expenses",
+                content: "The purchaser is responsible for bearing all costs related to the preparation of the conveyance deed, stamp duty, and registration charges.",
+                type: "financial",
                 importance: "medium"
             }
         ],
         importantDates: [
-            { date: "2024-03-01", event: "Employment Start Date", type: "start" },
-            { date: "2024-09-01", event: "Probationary Period End (6 months)", type: "milestone" },
-            { date: "2025-03-01", event: "First Annual Performance Review", type: "review" },
-            { date: "2025-03-01", event: "Salary Review & Adjustment", type: "financial" },
-            { date: "2026-03-01", event: "Contract Renewal Consideration", type: "renewal" },
-            { date: "2024-12-31", event: "Annual Equity Vesting (25%)", type: "equity" }
+            { date: "2025-09-20", event: "Agreement Date", type: "start" },
+            { date: "2025-09-27", event: "Title Deed Submission (within one week of agreement)", type: "milestone" },
+            { date: "2025-10-12", event: "Advocate's Report Deadline (within 15 days after deeds submission)", type: "review" },
+            { date: "2025-12-20", event: "Sale Completion Deadline (three months from agreement date)", type: "deadline" },
+            { date: "2025-09-27", event: "Earnest Money Refund (within 7 days of negative advocate's report)", type: "refund" }
         ],
         locations: [
-            { place: "TechCorp Headquarters", address: "500 Innovation Drive, Austin, TX 78701", type: "workplace" },
-            { place: "Austin Tech District Office", address: "1200 Barton Springs Rd, Austin, TX 78704", type: "workplace" },
-            { place: "Approved Remote Locations", address: "US-based locations with reliable internet", type: "remote" },
-            { place: "Legal Jurisdiction", address: "State of Texas, Travis County", type: "legal" }
+            { place: "Place of Agreement", address: "Guwahati, Assam", type: "legal" },
+            { place: "Vendor's Address", address: "House No. 45, Rajgarh Road, Guwahati, Assam, 781007", type: "vendor" },
+            { place: "Purchaser's Address", address: "Flat 3B, Sunshine Residency, Zoo Road, Guwahati, Assam, 781024", type: "purchaser" },
+            { place: "Property for Sale", address: "House No. 12, Lachit Nagar, G.S. Road, Guwahati, Assam, 781005", type: "property" }
         ],
         detailedBreakdown: [
             {
-                section: "Employment Structure & Responsibilities",
-                content: "Full-time Senior Software Engineer position reporting to Engineering Manager. Primary focus on backend systems, API development, and cloud infrastructure. Expected to mentor junior developers and contribute to architectural decisions. Standard 40-hour work week with on-call rotation participation.",
-                subsections: ["Job Title & Level", "Reporting Structure", "Core Responsibilities", "Work Schedule", "On-Call Duties"]
+                section: "Agreement Overview",
+                content: "This is a standard sale agreement that clearly defines the roles, responsibilities, and liabilities of both parties.",
+                subsections: ["Document Type", "Parties Involved", "Property Details", "Agreement Terms"]
             },
             {
-                section: "Comprehensive Compensation Analysis",
-                content: "Total compensation package valued at $145,000+ annually. Includes competitive base salary, performance bonuses, equity participation with 4-year vesting schedule, comprehensive health benefits, retirement matching, and professional development opportunities. Package benchmarked against Austin tech market standards.",
-                subsections: ["Base Salary", "Bonus Structure", "Equity Package", "Health Benefits", "Retirement Plans", "Professional Development"]
+                section: "Vendor's Obligations & Rights",
+                content: "Must provide a property free from any legal claims or liabilities (encumbrances). Must submit title deeds for verification in a timely manner. Must hand over vacant possession of the house upon final payment and registration. Must obtain necessary clearance certificates, such as from the Income Tax Act. Has the right to keep the ₹10,00,000 earnest money if the purchaser backs out of the deal.",
+                subsections: ["Property Clearance", "Title Deed Submission", "Vacant Possession", "Income Tax Clearance", "Earnest Money Rights"]
             },
             {
-                section: "Legal Rights & Obligations",
-                content: "Standard employment law protections with additional tech industry considerations. Includes work-for-hire IP assignments, reasonable non-compete provisions (limited to direct competitors in Austin metro), comprehensive confidentiality agreements, and dispute resolution through binding arbitration.",
-                subsections: ["IP Assignment", "Non-Compete Clause", "Confidentiality", "Dispute Resolution", "Termination Rights"]
+                section: "Purchaser's Obligations & Rights",
+                content: "Must pay the remaining balance of the sale price at the time of the final deed. Must complete the purchase within the three-month window. Must cover all ancillary costs like stamp duty and registration. Has the right to a clear title. If the title is found to be defective, she is entitled to a full refund of her earnest money within 7 days. Has the right to receive not only the earnest money back but also an additional ₹5,00,000 in damages if the vendor fails to honor the agreement.",
+                subsections: ["Payment Obligations", "Timeline Compliance", "Cost Responsibilities", "Title Rights", "Refund Rights", "Damage Claims"]
             },
             {
-                section: "Benefits & Perquisites Analysis",
-                content: "Excellent benefits package including premium healthcare (100% employee, 80% family coverage), dental, vision, $50/month wellness stipend, flexible PTO policy, 12 weeks parental leave, sabbatical program after 5 years, and stock purchase plan with 15% discount.",
-                subsections: ["Healthcare Coverage", "PTO Policy", "Parental Leave", "Wellness Programs", "Stock Purchase Plan", "Sabbatical Program"]
+                section: "Penalty Clause & Protection",
+                content: "A key feature is the penalty for a late refund by the vendor. If the vendor fails to return the earnest money within 7 days (after a bad title report), he will be charged interest at 1.5% per month until it is paid. This protects the purchaser's funds from being held up.",
+                subsections: ["Late Payment Penalty", "Interest Rate", "Purchaser Protection", "Timeline Enforcement"]
             }
         ]
-    }; useEffect(() => {
+    };
+
+    useEffect(() => {
         const fetchDocument = async () => {
             setLoadingDocument(true);
             try {
@@ -177,13 +190,45 @@ export default function DocumentPage() {
         };
 
         setChatMessages(prev => [...prev, userMessage]);
+        const currentMessage = newMessage;
         setNewMessage("");
         setIsTyping(true);
 
+        // Predefined Q&A for mockup
+        const mockResponses: { [key: string]: string } = {
+            'who is selling the house': "Mr. Ramesh Chandra Sharma is the vendor selling the house.",
+            'who is the seller': "Mr. Ramesh Chandra Sharma is the vendor selling the house.",
+            'what is the total price': "The total price is ₹85,00,000.",
+            'what is the price': "The total price is ₹85,00,000.",
+            'how much is the house': "The total price is ₹85,00,000.",
+            'how much do i need to pay now': "The agreement states that an earnest money of ₹10,00,000 has already been paid. The balance is due later.",
+            'how much to pay now': "The agreement states that an earnest money of ₹10,00,000 has already been paid. The balance is due later.",
+            'what happens if i change my mind': "If you breach the agreement, you will lose the ₹10,00,000 earnest money you paid.",
+            'what if i back out': "If you breach the agreement, you will lose the ₹10,00,000 earnest money you paid.",
+            'what if buyer changes mind': "If you breach the agreement, you will lose the ₹10,00,000 earnest money you paid.",
+            'who pays for registration': "The purchaser, Mrs. Anjali Das, is responsible for those expenses.",
+            'who pays stamp duty': "The purchaser, Mrs. Anjali Das, is responsible for those expenses.",
+            'who pays for registration and stamp duty': "The purchaser, Mrs. Anjali Das, is responsible for those expenses.",
+            'how long to finalize': "The sale must be completed within three months from September 20, 2025.",
+            'what is the timeline': "The sale must be completed within three months from September 20, 2025.",
+            'when is the deadline': "The sale must be completed within three months from September 20, 2025."
+        };
+
         setTimeout(() => {
+            // Find matching response
+            let response = "I can help you understand this Agreement for Sale document. Feel free to ask about the parties involved, pricing, timeline, or any specific clauses.";
+
+            const lowerMessage = currentMessage.toLowerCase().trim();
+            for (const [key, value] of Object.entries(mockResponses)) {
+                if (lowerMessage.includes(key)) {
+                    response = value;
+                    break;
+                }
+            }
+
             const botResponse = {
                 id: chatMessages.length + 2,
-                text: `Based on the document "${documentData?.name}", I can help you with that. This is a sample response that would normally come from AI analysis of the document content.`,
+                text: response,
                 sender: 'bot' as const,
                 timestamp: new Date()
             };
@@ -252,7 +297,7 @@ export default function DocumentPage() {
                                 { id: 'clauses', label: 'Key Clauses', icon: '' },
                                 { id: 'dates', label: 'Important Dates', icon: '' },
                                 { id: 'locations', label: 'Places & Jurisdiction', icon: '' },
-                                { id: 'breakdown', label: 'Vertex AI Analysis', icon: '' }
+                                { id: 'breakdown', label: 'Detailed Breakdown', icon: '' }
                             ].map((section) => (
                                 <button
                                     key={section.id}
@@ -350,9 +395,7 @@ export default function DocumentPage() {
                                                         dateItem.type === 'review' ? 'bg-purple-500' :
                                                             'bg-orange-500'
                                                     }`}>
-                                                    {dateItem.type === 'start' ? 'START' :
-                                                        dateItem.type === 'milestone' ? 'MILE' :
-                                                            dateItem.type === 'review' ? 'REV' : 'UPD'}
+                                                    {index + 1}
                                                 </div>
                                             </div>
                                             <div className="flex-grow">
@@ -388,8 +431,7 @@ export default function DocumentPage() {
                                                     location.type === 'remote' ? 'bg-green-500' :
                                                         'bg-purple-500'
                                                     }`}>
-                                                    {location.type === 'workplace' ? 'WRK' :
-                                                        location.type === 'remote' ? 'RMT' : 'LEG'}
+                                                    {index + 1}
                                                 </div>
                                                 <div className="flex-grow">
                                                     <h3 className="text-lg font-semibold text-gray-900">{location.place}</h3>
