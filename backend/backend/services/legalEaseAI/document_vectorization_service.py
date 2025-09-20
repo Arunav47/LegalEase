@@ -329,9 +329,25 @@ class DocumentVectorizationService:
         if not chunks:
             return {}
         
-        total_chars = sum(chunk['chunk_size'] for chunk in chunks)
-        pages = set(chunk['page_number'] for chunk in chunks)
-        sections = set(chunk['section'] for chunk in chunks if chunk['section'])
+        # Safely handle missing keys
+        total_chars = 0
+        pages = set()
+        sections = set()
+        
+        for chunk in chunks:
+            # Safely handle 'chunk_size' - if missing, use text length or default to 0
+            if 'chunk_size' in chunk:
+                total_chars += chunk['chunk_size']
+            elif 'text' in chunk:
+                total_chars += len(chunk['text'])
+            
+            # Safely get page number
+            if 'page_number' in chunk:
+                pages.add(chunk['page_number'])
+            
+            # Safely get section
+            if 'section' in chunk and chunk['section']:
+                sections.add(chunk['section'])
         
         return {
             'total_chunks': len(chunks),

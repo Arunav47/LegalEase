@@ -9,7 +9,11 @@ from typing import Dict, Any, List, Optional
 from pathlib import Path
 import asyncio
 
-from .astra_db_service import get_astra_db_service
+try:
+    from .astra_db_service import get_astra_db_service
+except Exception:
+    get_astra_db_service = None  # Astra integration is optional
+
 from .document_vectorization_service import get_document_vectorization_service
 from .langgraph_workflow import get_legal_analysis_workflow
 
@@ -19,7 +23,7 @@ class EnhancedLegalAnalysisService:
     """Enhanced service for legal document analysis with RAG capabilities"""
     
     def __init__(self):
-        self.astra_db = get_astra_db_service()
+        self.astra_db = get_astra_db_service() if get_astra_db_service else None
         self.vectorization_service = get_document_vectorization_service()
         self.workflow = get_legal_analysis_workflow()
     
@@ -44,14 +48,14 @@ class EnhancedLegalAnalysisService:
                     "error": "Failed to process document - no content extracted"
                 }
             
-            # Store chunks in vector database
-            success = await self.astra_db.store_document_chunks(doc_id, chunks)
-            
-            if not success:
-                return {
-                    "success": False,
-                    "error": "Failed to store document in vector database"
-                }
+            if self.astra_db:
+                # Store chunks in vector database
+                store_res = await self.astra_db.store_document_chunks(doc_id, chunks)
+                if not store_res.get("success"):
+                    return {
+                        "success": False,
+                        "error": store_res.get("error", "Failed to store document in vector database")
+                    }
             
             # Calculate document statistics
             stats = self.vectorization_service.calculate_document_stats(chunks)
@@ -170,43 +174,59 @@ class EnhancedLegalAnalysisService:
     async def get_document_status(self, document_id: str) -> Dict[str, Any]:
         """Get status and metadata about a processed document"""
         try:
-            # Get document chunks to verify it exists
-            chunks = await self.astra_db.get_document_chunks(document_id)
-            
-            if not chunks:
+            if self.astra_db:
+                # Get document chunks to verify it exists
+                chunks = await self.astra_db.get_document_chunks(document_id)
+                
+                if not chunks:
+                    return {
+                        "exists": False,
+                        "message": "Document not found in vector database"
+                    }
+                
+                # Calculate statistics
+                stats = self.vectorization_service.calculate_document_stats(chunks)
+                
+                return {
+                    "exists": True,
+                    "document_id": document_id,
+                    "statistics": stats,
+                    "chunks_count": len(chunks)
+                }
+            else:
                 return {
                     "exists": False,
-                    "message": "Document not found in vector database"
+                    "message": "Astra DB service is not available"
                 }
-            
-            # Calculate statistics
-            stats = self.vectorization_service.calculate_document_stats(chunks)
-            
-            return {
-                "exists": True,
-                "document_id": document_id,
-                "statistics": stats,
-                "chunks_count": len(chunks)
-            }
             
         except Exception as e:
             logger.error(f"Error getting document status: {e}")
-            return {"error": str(e)}
+            return {
+                "exists": False,
+                "document_id": document_id,
+                "error": str(e)
+            }
     
     async def delete_document(self, document_id: str) -> Dict[str, Any]:
         """Delete a document from the vector database"""
         try:
-            success = await self.astra_db.delete_document(document_id)
-            
-            if success:
-                return {
-                    "success": True,
-                    "message": f"Document {document_id} deleted successfully"
-                }
+            if self.astra_db:
+                success = await self.astra_db.delete_document(document_id)
+                
+                if success:
+                    return {
+                        "success": True,
+                        "message": f"Document {document_id} deleted successfully"
+                    }
+                else:
+                    return {
+                        "success": False,
+                        "message": "Failed to delete document"
+                    }
             else:
                 return {
                     "success": False,
-                    "message": "Failed to delete document"
+                    "message": "Astra DB service is not available"
                 }
                 
         except Exception as e:
@@ -216,7 +236,10 @@ class EnhancedLegalAnalysisService:
     def get_database_stats(self) -> Dict[str, Any]:
         """Get statistics about the vector database"""
         try:
-            return self.astra_db.get_collection_stats()
+            if self.astra_db:
+                return self.astra_db.get_collection_stats()
+            else:
+                return {"error": "Astra DB service is not available"}
         except Exception as e:
             logger.error(f"Error getting database stats: {e}")
             return {"error": str(e)}
