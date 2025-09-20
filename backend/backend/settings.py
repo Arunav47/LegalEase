@@ -53,6 +53,23 @@ class Settings(BaseSettings):
     redis_user: Optional[str] = None
     redis_pass: Optional[str] = None
     redis_base: Optional[int] = None
+    
+    # Google Cloud settings
+    google_application_credentials: Optional[str] = None
+    project_id: Optional[str] = None
+    location: Optional[str] = None
+    processor_id: Optional[str] = None
+    google_cloud_api_key: Optional[str] = None
+    
+    # AI Model API settings
+    gemini_api_key: Optional[str] = None
+    mistral_api_key: Optional[str] = None
+    
+    # Astra DB settings
+    astra_db_application_token: Optional[str] = None
+    astra_db_id: Optional[str] = None
+    astra_db_endpoint: Optional[str] = None
+    astra_db_region: Optional[str] = None
 
     @property
     def db_url(self) -> URL:
@@ -93,6 +110,8 @@ class Settings(BaseSettings):
         env_file=".env",
         env_prefix="BACKEND_",
         env_file_encoding="utf-8",
+        extra="allow",  # Allow extra fields in environment variables
+        case_sensitive=False,  # Make field lookup case-insensitive
     )
 
 
