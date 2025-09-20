@@ -5,7 +5,8 @@
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-*$py.class
+*$py.class'
+
 
 # C extensions
 *.so
@@ -15,6 +16,7 @@ __pycache__/
 build/
 develop-eggs/
 dist/
+backend/keys/
 downloads/
 eggs/
 .eggs/

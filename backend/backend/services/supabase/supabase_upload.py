@@ -102,21 +102,25 @@ class SupabaseService:
         ext = ext or ".pdf"
         storage_key = f"{doc_id}{ext}"
 
-        # Upload file (upsert)
+        # Upload file (try upload first, then update if exists)
         try:
             self.client.storage.from_(self.bucket).upload(
                 path=storage_key,
                 file=file_path,
-                file_options={"content-type": "application/pdf", "upsert": True},
-            )
-        except Exception as e:
-            # If already exists and upsert not honored by backend, try update
-            logger.warning(f"Upload attempt failed, retrying with update: {e}")
-            self.client.storage.from_(self.bucket).update(
-                path=storage_key,
-                file=file_path,
                 file_options={"content-type": "application/pdf"},
             )
+        except Exception as e:
+            # If already exists, try update instead
+            logger.warning(f"Upload attempt failed, retrying with update: {e}")
+            try:
+                self.client.storage.from_(self.bucket).update(
+                    path=storage_key,
+                    file=file_path,
+                    file_options={"content-type": "application/pdf"},
+                )
+            except Exception as update_e:
+                logger.error(f"Both upload and update failed: {update_e}")
+                raise update_e
 
         # Get public URL if bucket is public
         public_url: Optional[str] = None

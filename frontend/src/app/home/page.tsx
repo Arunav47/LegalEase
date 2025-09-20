@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Threads from "@/app/ui/Threads";
 import ResponsiveSearchBar from "@/app/ui/ResponsiveSearchBar";
+import { legalAiService, ApiError } from "@/app/lib/services/legalAiService";
 
 export default function HomePage() {
     const { isLoading, isAuthenticated } = useAuthGuard('protected');
@@ -113,17 +114,28 @@ export default function HomePage() {
         if (!uploadFile) return;
 
         setIsUploading(true);
+        setUploadError('');
 
         try {
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            setShowUpload(false);
-            setUploadFile(null);
-            setUploadError('');
-
-            // Redirect to document page to show the mockup
-            router.push('/document/new-upload');
+            const result = await legalAiService.uploadDocument(uploadFile);
+            
+            if (result.success && result.document_id) {
+                setShowUpload(false);
+                setUploadFile(null);
+                setUploadError('');
+                
+                // Redirect to document page with the actual document ID
+                router.push(`/document/${result.document_id}`);
+            } else {
+                throw new Error(result.error || 'Upload failed');
+            }
         } catch (error) {
-            setUploadError('Upload failed. Please try again.');
+            console.error('Upload error:', error);
+            if (error instanceof ApiError) {
+                setUploadError(`Upload failed: ${error.message}`);
+            } else {
+                setUploadError('Upload failed. Please try again.');
+            }
         } finally {
             setIsUploading(false);
         }

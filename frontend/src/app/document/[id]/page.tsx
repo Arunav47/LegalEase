@@ -3,20 +3,25 @@
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
+import { legalAiService, ApiError } from "@/app/lib/services/legalAiService";
+import { DocumentData } from "@/app/lib/types/api";
 
 export default function DocumentPage() {
     const { isLoading, isAuthenticated } = useAuthGuard('protected');
     const params = useParams();
     const router = useRouter();
-    const [documentData, setDocumentData] = useState<any>(null);
+    const [documentData, setDocumentData] = useState<DocumentData | null>(null);
     const [loadingDocument, setLoadingDocument] = useState(true);
+    const [documentError, setDocumentError] = useState<string | null>(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [activeSection, setActiveSection] = useState("overview");
     const [isChatOpen, setIsChatOpen] = useState(false);
+    const [sectionLoading, setSectionLoading] = useState<Record<string, boolean>>({});
+    const [sectionData, setSectionData] = useState<Record<string, any>>({});
     const [chatMessages, setChatMessages] = useState<Array<{ id: number, text: string, sender: 'user' | 'bot', timestamp: Date }>>([
         {
             id: 1,
-            text: "Hello! I'm your Gemini-powered document assistant. I've analyzed this Agreement for Sale document. Ask me about the seller, buyer, price, timeline, or any specific terms in the agreement.",
+            text: "Hello! I'm your Gemini-powered document assistant. I've analyzed this document. Ask me anything about it!",
             sender: 'bot',
             timestamp: new Date()
         }
@@ -24,115 +29,118 @@ export default function DocumentPage() {
     const [newMessage, setNewMessage] = useState("");
     const [isTyping, setIsTyping] = useState(false);
 
-    const mockDocumentData = {
-        id: params.id,
-        name: "Agreement_for_Sale_Guwahati_2025.pdf",
-        type: "Gemini Deep Analysis",
-        uploadDate: "2025-09-20",
-        status: "AI Analyzed",
-        summary: "This document is an Agreement for Sale for a residential house. It outlines the terms and conditions for the sale of a property located in Guwahati, Assam. The agreement was made on September 20, 2025, between the seller, Mr. Ramesh Chandra Sharma (the Vendor), and the buyer, Mrs. Anjali Das (the Purchaser). The total sale price is ₹85,00,000, with an initial earnest money payment of ₹10,00,000 already made by the purchaser.",
-        keyClauses: [
-            {
-                title: "Sale and Price",
-                content: "The vendor agrees to sell the house for ₹85,00,000, free from all encumbrances.",
-                type: "financial",
-                importance: "high"
-            },
-            {
-                title: "Earnest Money",
-                content: "The purchaser has paid ₹10,00,000 as earnest money on the date of the agreement. The remaining balance is to be paid when the final conveyance deed is executed.",
-                type: "financial",
-                importance: "high"
-            },
-            {
-                title: "Timeframe",
-                content: "The sale must be completed within three months from the agreement date, with time being of the essence.",
-                type: "timeline",
-                importance: "critical"
-            },
-            {
-                title: "Title Verification",
-                content: "The vendor must provide the property's title deeds to the purchaser's advocate within one week. The advocate then has 15 days to report on the title's clarity.",
-                type: "legal",
-                importance: "high"
-            },
-            {
-                title: "Purchaser's Default",
-                content: "If the purchaser breaks the agreement, the vendor is entitled to forfeit the earnest money and is free to sell the property to someone else.",
-                type: "default",
-                importance: "medium"
-            },
-            {
-                title: "Vendor's Default",
-                content: "If the vendor breaks the agreement, he must refund the earnest money and also pay ₹5,00,000 as liquidated damages to the purchaser.",
-                type: "default",
-                importance: "high"
-            },
-            {
-                title: "Expenses",
-                content: "The purchaser is responsible for bearing all costs related to the preparation of the conveyance deed, stamp duty, and registration charges.",
-                type: "financial",
-                importance: "medium"
+    // Helper function to safely get document ID as string
+    const getDocumentId = (): string | null => {
+        if (!params.id) return null;
+        return Array.isArray(params.id) ? params.id[0] : params.id;
+    };
+
+    // Fetch section data dynamically
+    const fetchSectionData = async (section: string, documentId: string) => {
+        if (sectionData[section]) return; // Already loaded
+        
+        setSectionLoading(prev => ({ ...prev, [section]: true }));
+        
+        try {
+            let result;
+            switch (section) {
+                case 'clauses':
+                    result = await legalAiService.getImportantClauses(documentId);
+                    break;
+                case 'dates':
+                    result = await legalAiService.getImportantDates(documentId);
+                    break;
+                case 'locations':
+                    result = await legalAiService.getKeyEntities(documentId); // This includes locations
+                    break;
+                case 'breakdown':
+                    result = await legalAiService.getDetailedBreakdown(documentId);
+                    break;
+                case 'risks':
+                    result = await legalAiService.getAttentionPoints(documentId);
+                    break;
+                case 'mindmap':
+                    result = await legalAiService.getMindMap(documentId);
+                    break;
+                default:
+                    return;
             }
-        ],
-        importantDates: [
-            { date: "2025-09-20", event: "Agreement Date", type: "start" },
-            { date: "2025-09-27", event: "Title Deed Submission (within one week of agreement)", type: "milestone" },
-            { date: "2025-10-12", event: "Advocate's Report Deadline (within 15 days after deeds submission)", type: "review" },
-            { date: "2025-12-20", event: "Sale Completion Deadline (three months from agreement date)", type: "deadline" },
-            { date: "2025-09-27", event: "Earnest Money Refund (within 7 days of negative advocate's report)", type: "refund" }
-        ],
-        locations: [
-            { place: "Place of Agreement", address: "Guwahati, Assam", type: "legal" },
-            { place: "Vendor's Address", address: "House No. 45, Rajgarh Road, Guwahati, Assam, 781007", type: "vendor" },
-            { place: "Purchaser's Address", address: "Flat 3B, Sunshine Residency, Zoo Road, Guwahati, Assam, 781024", type: "purchaser" },
-            { place: "Property for Sale", address: "House No. 12, Lachit Nagar, G.S. Road, Guwahati, Assam, 781005", type: "property" }
-        ],
-        detailedBreakdown: [
-            {
-                section: "Agreement Overview",
-                content: "This is a standard sale agreement that clearly defines the roles, responsibilities, and liabilities of both parties.",
-                subsections: ["Document Type", "Parties Involved", "Property Details", "Agreement Terms"]
-            },
-            {
-                section: "Vendor's Obligations & Rights",
-                content: "Must provide a property free from any legal claims or liabilities (encumbrances). Must submit title deeds for verification in a timely manner. Must hand over vacant possession of the house upon final payment and registration. Must obtain necessary clearance certificates, such as from the Income Tax Act. Has the right to keep the ₹10,00,000 earnest money if the purchaser backs out of the deal.",
-                subsections: ["Property Clearance", "Title Deed Submission", "Vacant Possession", "Income Tax Clearance", "Earnest Money Rights"]
-            },
-            {
-                section: "Purchaser's Obligations & Rights",
-                content: "Must pay the remaining balance of the sale price at the time of the final deed. Must complete the purchase within the three-month window. Must cover all ancillary costs like stamp duty and registration. Has the right to a clear title. If the title is found to be defective, she is entitled to a full refund of her earnest money within 7 days. Has the right to receive not only the earnest money back but also an additional ₹5,00,000 in damages if the vendor fails to honor the agreement.",
-                subsections: ["Payment Obligations", "Timeline Compliance", "Cost Responsibilities", "Title Rights", "Refund Rights", "Damage Claims"]
-            },
-            {
-                section: "Penalty Clause & Protection",
-                content: "A key feature is the penalty for a late refund by the vendor. If the vendor fails to return the earnest money within 7 days (after a bad title report), he will be charged interest at 1.5% per month until it is paid. This protects the purchaser's funds from being held up.",
-                subsections: ["Late Payment Penalty", "Interest Rate", "Purchaser Protection", "Timeline Enforcement"]
-            }
-        ]
+            
+            setSectionData(prev => ({ ...prev, [section]: result.result }));
+        } catch (error) {
+            console.error(`Error fetching ${section}:`, error);
+            setSectionData(prev => ({ 
+                ...prev, 
+                [section]: { error: error instanceof ApiError ? error.message : 'Failed to load data' }
+            }));
+        } finally {
+            setSectionLoading(prev => ({ ...prev, [section]: false }));
+        }
     };
 
     useEffect(() => {
         const fetchDocument = async () => {
+            const documentId = getDocumentId();
+            if (!documentId) {
+                setDocumentError('Invalid document ID');
+                setLoadingDocument(false);
+                return;
+            }
+
             setLoadingDocument(true);
+            setDocumentError(null);
+            
             try {
-                await new Promise(resolve => setTimeout(resolve, 1000));
-                setDocumentData(mockDocumentData);
+                // First check if document exists and get its status
+                const statusResult = await legalAiService.getDocumentStatus(documentId);
+                
+                if (!statusResult.exists) {
+                    throw new Error('Document not found');
+                }
+
+                // Get document summary (this gives us basic info)
+                const summaryResult = await legalAiService.getDocumentSummary(documentId);
+                
+                // Build document data from the API response
+                const docData: DocumentData = {
+                    id: documentId,
+                    name: `Document_${documentId}.pdf`, // You might want to store this in the backend
+                    type: "Gemini Deep Analysis",
+                    uploadDate: new Date().toISOString().split('T')[0], // or get from statusResult
+                    status: "AI Analyzed",
+                    summary: summaryResult.result?.summary || summaryResult.result?.content || 'No summary available',
+                };
+                
+                setDocumentData(docData);
             } catch (error) {
                 console.error("Failed to load document:", error);
+                if (error instanceof ApiError) {
+                    setDocumentError(`Failed to load document: ${error.message}`);
+                } else {
+                    setDocumentError('Failed to load document. Please try again.');
+                }
             } finally {
                 setLoadingDocument(false);
             }
         };
 
-        if (params.id) {
+        const documentId = getDocumentId();
+        if (documentId) {
             fetchDocument();
         }
     }, [params.id]);
 
+    // Handle tab changes and fetch section data
+    useEffect(() => {
+        const documentId = getDocumentId();
+        if (documentId && activeSection !== 'overview') {
+            fetchSectionData(activeSection, documentId);
+        }
+    }, [activeSection, params.id]);
+
     const handleAudioPlay = () => {
         setIsPlaying(!isPlaying);
-        if (!isPlaying) {
+        if (!isPlaying && documentData?.summary) {
             const utterance = new SpeechSynthesisUtterance(documentData.summary);
             utterance.onend = () => setIsPlaying(false);
             speechSynthesis.speak(utterance);
@@ -140,6 +148,48 @@ export default function DocumentPage() {
             speechSynthesis.cancel();
         }
     };
+
+    // Helper function to render loading state
+    const renderLoadingState = (title: string) => (
+        <div className="space-y-6">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 backdrop-blur-sm bg-opacity-95">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">{title}</h2>
+                <div className="flex justify-center items-center py-12">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                    <span className="ml-4 text-gray-600">Loading {title.toLowerCase()}...</span>
+                </div>
+            </div>
+        </div>
+    );
+
+    // Helper function to render error state
+    const renderErrorState = (title: string, error: string) => (
+        <div className="space-y-6">
+            <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 backdrop-blur-sm bg-opacity-95">
+                <h2 className="text-2xl font-bold text-gray-900 mb-6">{title}</h2>
+                <div className="text-center py-12">
+                    <div className="text-red-600 mb-4">
+                        <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                    <p className="text-gray-600 mb-4">{error}</p>
+                    <button 
+                        onClick={() => {
+                            const documentId = getDocumentId();
+                            if (documentId) {
+                                setSectionData(prev => ({ ...prev, [activeSection]: undefined }));
+                                fetchSectionData(activeSection, documentId);
+                            }
+                        }}
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+                    >
+                        Try Again
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
 
     const getImportanceColor = (importance: string) => {
         switch (importance) {
@@ -194,47 +244,36 @@ export default function DocumentPage() {
         setNewMessage("");
         setIsTyping(true);
 
-        // Predefined Q&A for mockup
-        const mockResponses: { [key: string]: string } = {
-            'who is selling the house': "Mr. Ramesh Chandra Sharma is the vendor selling the house.",
-            'who is the seller': "Mr. Ramesh Chandra Sharma is the vendor selling the house.",
-            'what is the total price': "The total price is ₹85,00,000.",
-            'what is the price': "The total price is ₹85,00,000.",
-            'how much is the house': "The total price is ₹85,00,000.",
-            'how much do i need to pay now': "The agreement states that an earnest money of ₹10,00,000 has already been paid. The balance is due later.",
-            'how much to pay now': "The agreement states that an earnest money of ₹10,00,000 has already been paid. The balance is due later.",
-            'what happens if i change my mind': "If you breach the agreement, you will lose the ₹10,00,000 earnest money you paid.",
-            'what if i back out': "If you breach the agreement, you will lose the ₹10,00,000 earnest money you paid.",
-            'what if buyer changes mind': "If you breach the agreement, you will lose the ₹10,00,000 earnest money you paid.",
-            'who pays for registration': "The purchaser, Mrs. Anjali Das, is responsible for those expenses.",
-            'who pays stamp duty': "The purchaser, Mrs. Anjali Das, is responsible for those expenses.",
-            'who pays for registration and stamp duty': "The purchaser, Mrs. Anjali Das, is responsible for those expenses.",
-            'how long to finalize': "The sale must be completed within three months from September 20, 2025.",
-            'what is the timeline': "The sale must be completed within three months from September 20, 2025.",
-            'when is the deadline': "The sale must be completed within three months from September 20, 2025."
-        };
-
-        setTimeout(() => {
-            // Find matching response
-            let response = "I can help you understand this Agreement for Sale document. Feel free to ask about the parties involved, pricing, timeline, or any specific clauses.";
-
-            const lowerMessage = currentMessage.toLowerCase().trim();
-            for (const [key, value] of Object.entries(mockResponses)) {
-                if (lowerMessage.includes(key)) {
-                    response = value;
-                    break;
-                }
+        try {
+            const documentId = getDocumentId();
+            if (!documentId) {
+                throw new Error('Invalid document ID');
             }
+
+            const response = await legalAiService.chatWithDocument({
+                document_id: documentId,
+                question: currentMessage
+            });
 
             const botResponse = {
                 id: chatMessages.length + 2,
-                text: response,
+                text: response.answer,
                 sender: 'bot' as const,
                 timestamp: new Date()
             };
             setChatMessages(prev => [...prev, botResponse]);
+        } catch (error) {
+            console.error('Chat error:', error);
+            const errorResponse = {
+                id: chatMessages.length + 2,
+                text: "I'm sorry, I'm having trouble responding right now. Please try again later.",
+                sender: 'bot' as const,
+                timestamp: new Date()
+            };
+            setChatMessages(prev => [...prev, errorResponse]);
+        } finally {
             setIsTyping(false);
-        }, 1500);
+        }
     };
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -254,6 +293,38 @@ export default function DocumentPage() {
 
     if (!isAuthenticated) {
         return null;
+    }
+
+    if (documentError) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
+                <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 max-w-md mx-4">
+                    <div className="text-center">
+                        <div className="text-red-600 mb-4">
+                            <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <h2 className="text-xl font-bold text-gray-900 mb-2">Document Not Found</h2>
+                        <p className="text-gray-600 mb-6">{documentError}</p>
+                        <div className="space-x-3">
+                            <button 
+                                onClick={() => router.back()}
+                                className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-2 rounded-lg transition-colors"
+                            >
+                                Go Back
+                            </button>
+                            <button 
+                                onClick={() => router.push('/home')}
+                                className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition-colors"
+                            >
+                                Go Home
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -357,118 +428,184 @@ export default function DocumentPage() {
                     )}
 
                     {activeSection === 'clauses' && (
+                        sectionLoading.clauses ? renderLoadingState("Key Clauses Analysis") :
+                        sectionData.clauses?.error ? renderErrorState("Key Clauses Analysis", sectionData.clauses.error) :
                         <div className="space-y-6">
                             <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 backdrop-blur-sm bg-opacity-95">
                                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Key Clauses Analysis</h2>
                                 <div className="grid gap-6">
-                                    {documentData?.keyClauses?.map((clause: any, index: number) => (
-                                        <div key={index} className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
-                                            <div className="flex items-start justify-between mb-4">
-                                                <div className="flex items-center space-x-3">
-                                                    <div className="flex-shrink-0 text-blue-600">
-                                                        {getTypeIcon(clause.type)}
+                                    {sectionData.clauses && Array.isArray(sectionData.clauses.clauses) ? 
+                                        sectionData.clauses.clauses.map((clause: any, index: number) => (
+                                            <div key={index} className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+                                                <div className="flex items-start justify-between mb-4">
+                                                    <div className="flex items-center space-x-3">
+                                                        <div className="flex-shrink-0 text-blue-600">
+                                                            {getTypeIcon('legal')}
+                                                        </div>
+                                                        <h3 className="text-lg font-semibold text-gray-900">
+                                                            {clause.title || clause.clause_text?.substring(0, 50) + '...' || `Clause ${index + 1}`}
+                                                        </h3>
                                                     </div>
-                                                    <h3 className="text-lg font-semibold text-gray-900">{clause.title}</h3>
+                                                    <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getImportanceColor(clause.importance || 'medium')}`}>
+                                                        {(clause.importance || 'medium').toUpperCase()}
+                                                    </span>
                                                 </div>
-                                                <span className={`px-3 py-1 rounded-full text-xs font-medium border ${getImportanceColor(clause.importance)}`}>
-                                                    {clause.importance.toUpperCase()}
-                                                </span>
+                                                <p className="text-gray-700 leading-relaxed">
+                                                    {clause.content || clause.clause_text || clause.text || 'No content available'}
+                                                </p>
+                                                {clause.source && (
+                                                    <p className="text-sm text-gray-500 mt-2">Source: {clause.source}</p>
+                                                )}
                                             </div>
-                                            <p className="text-gray-700 leading-relaxed">{clause.content}</p>
+                                        )) :
+                                        <div className="text-center py-8">
+                                            <p className="text-gray-600">No clauses found or data is being processed.</p>
                                         </div>
-                                    ))}
+                                    }
                                 </div>
                             </div>
                         </div>
                     )}
 
                     {activeSection === 'dates' && (
+                        sectionLoading.dates ? renderLoadingState("Important Dates Timeline") :
+                        sectionData.dates?.error ? renderErrorState("Important Dates Timeline", sectionData.dates.error) :
                         <div className="space-y-6">
                             <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 backdrop-blur-sm bg-opacity-95">
                                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Important Dates Timeline</h2>
                                 <div className="space-y-6">
-                                    {documentData?.importantDates?.map((dateItem: any, index: number) => (
-                                        <div key={index} className="flex items-center space-x-6 p-4 border border-gray-200 rounded-xl hover:shadow-lg transition-all duration-300">
-                                            <div className="flex-shrink-0">
-                                                <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold ${dateItem.type === 'start' ? 'bg-green-500' :
-                                                    dateItem.type === 'milestone' ? 'bg-blue-500' :
-                                                        dateItem.type === 'review' ? 'bg-purple-500' :
-                                                            'bg-orange-500'
-                                                    }`}>
-                                                    {index + 1}
+                                    {sectionData.dates && Array.isArray(sectionData.dates.dates) ? 
+                                        sectionData.dates.dates.map((dateItem: any, index: number) => (
+                                            <div key={index} className="flex items-center space-x-6 p-4 border border-gray-200 rounded-xl hover:shadow-lg transition-all duration-300">
+                                                <div className="flex-shrink-0">
+                                                    <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold bg-blue-500`}>
+                                                        {index + 1}
+                                                    </div>
+                                                </div>
+                                                <div className="flex-grow">
+                                                    <h3 className="text-lg font-semibold text-gray-900">
+                                                        {dateItem.event || dateItem.description || `Date ${index + 1}`}
+                                                    </h3>
+                                                    <p className="text-gray-600">
+                                                        {dateItem.date && new Date(dateItem.date).toLocaleDateString('en-US', {
+                                                            year: 'numeric',
+                                                            month: 'long',
+                                                            day: 'numeric'
+                                                        })}
+                                                    </p>
+                                                    {dateItem.context && (
+                                                        <p className="text-sm text-gray-500 mt-1">{dateItem.context}</p>
+                                                    )}
+                                                </div>
+                                                <div className="text-right">
+                                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${dateItem.date && new Date(dateItem.date) > new Date() ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'}`}>
+                                                        {dateItem.date && new Date(dateItem.date) > new Date() ? 'Upcoming' : 'Past'}
+                                                    </span>
                                                 </div>
                                             </div>
-                                            <div className="flex-grow">
-                                                <h3 className="text-lg font-semibold text-gray-900">{dateItem.event}</h3>
-                                                <p className="text-gray-600">{new Date(dateItem.date).toLocaleDateString('en-US', {
-                                                    year: 'numeric',
-                                                    month: 'long',
-                                                    day: 'numeric'
-                                                })}</p>
-                                            </div>
-                                            <div className="text-right">
-                                                <span className={`px-3 py-1 rounded-full text-xs font-medium ${new Date(dateItem.date) > new Date() ? 'bg-blue-100 text-blue-800' : 'bg-gray-100 text-gray-800'
-                                                    }`}>
-                                                    {new Date(dateItem.date) > new Date() ? 'Upcoming' : 'Completed'}
-                                                </span>
-                                            </div>
+                                        )) :
+                                        <div className="text-center py-8">
+                                            <p className="text-gray-600">No important dates found or data is being processed.</p>
                                         </div>
-                                    ))}
+                                    }
                                 </div>
                             </div>
                         </div>
                     )}
 
                     {activeSection === 'locations' && (
+                        sectionLoading.locations ? renderLoadingState("Key Entities & Locations") :
+                        sectionData.locations?.error ? renderErrorState("Key Entities & Locations", sectionData.locations.error) :
                         <div className="space-y-6">
                             <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 backdrop-blur-sm bg-opacity-95">
-                                <h2 className="text-2xl font-bold text-gray-900 mb-6">Important Locations</h2>
+                                <h2 className="text-2xl font-bold text-gray-900 mb-6">Key Entities & Locations</h2>
                                 <div className="grid gap-6 md:grid-cols-2">
-                                    {documentData?.locations?.map((location: any, index: number) => (
-                                        <div key={index} className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
-                                            <div className="flex items-start space-x-4">
-                                                <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white ${location.type === 'workplace' ? 'bg-blue-500' :
-                                                    location.type === 'remote' ? 'bg-green-500' :
-                                                        'bg-purple-500'
-                                                    }`}>
-                                                    {index + 1}
-                                                </div>
-                                                <div className="flex-grow">
-                                                    <h3 className="text-lg font-semibold text-gray-900">{location.place}</h3>
-                                                    <p className="text-gray-600 mt-1">{location.address}</p>
-                                                    <span className="inline-block mt-2 px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">
-                                                        {location.type}
-                                                    </span>
+                                    {sectionData.locations && (
+                                        sectionData.locations.entities || sectionData.locations.parties || sectionData.locations
+                                    ) ? (
+                                        Object.entries(sectionData.locations.entities || sectionData.locations.parties || sectionData.locations).map(([key, value]: [string, any], index: number) => (
+                                            <div key={index} className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
+                                                <div className="flex items-start space-x-4">
+                                                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white bg-purple-500`}>
+                                                        {key.substring(0, 1).toUpperCase()}
+                                                    </div>
+                                                    <div className="flex-grow">
+                                                        <h3 className="text-lg font-semibold text-gray-900">{key}</h3>
+                                                        <p className="text-gray-600 mt-1">
+                                                            {Array.isArray(value) ? value.join(', ') : 
+                                                             typeof value === 'string' ? value : 
+                                                             JSON.stringify(value)}
+                                                        </p>
+                                                        <span className="inline-block mt-2 px-2 py-1 bg-gray-100 text-gray-800 text-xs rounded-full">
+                                                            {key}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
+                                        ))
+                                    ) : (
+                                        <div className="text-center py-8 col-span-2">
+                                            <p className="text-gray-600">No entities or locations found or data is being processed.</p>
                                         </div>
-                                    ))}
+                                    )}
                                 </div>
                             </div>
                         </div>
                     )}
 
                     {activeSection === 'breakdown' && (
+                        sectionLoading.breakdown ? renderLoadingState("Detailed Breakdown") :
+                        sectionData.breakdown?.error ? renderErrorState("Detailed Breakdown", sectionData.breakdown.error) :
                         <div className="space-y-6">
                             <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 backdrop-blur-sm bg-opacity-95">
                                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Detailed Breakdown</h2>
                                 <div className="space-y-8">
-                                    {documentData?.detailedBreakdown?.map((section: any, index: number) => (
-                                        <div key={index} className="border border-gray-200 rounded-xl p-6">
-                                            <h3 className="text-xl font-semibold text-gray-900 mb-4">{section.section}</h3>
-                                            <p className="text-gray-700 leading-relaxed mb-4">{section.content}</p>
-                                            <div className="flex flex-wrap gap-2">
-                                                {section.subsections.map((subsection: any, subIndex: number) => (
-                                                    <span
-                                                        key={subIndex}
-                                                        className="px-3 py-1 bg-gradient-to-r from-blue-100 to-purple-100 text-gray-700 rounded-full text-sm font-medium"
-                                                    >
-                                                        {subsection}
-                                                    </span>
-                                                ))}
+                                    {sectionData.breakdown && sectionData.breakdown.breakdown ? (
+                                        typeof sectionData.breakdown.breakdown === 'string' ? (
+                                            <div className="border border-gray-200 rounded-xl p-6">
+                                                <div className="prose max-w-none">
+                                                    <p className="text-gray-700 leading-relaxed whitespace-pre-wrap">
+                                                        {sectionData.breakdown.breakdown}
+                                                    </p>
+                                                </div>
                                             </div>
+                                        ) : Array.isArray(sectionData.breakdown.breakdown) ? (
+                                            sectionData.breakdown.breakdown.map((section: any, index: number) => (
+                                                <div key={index} className="border border-gray-200 rounded-xl p-6">
+                                                    <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                                                        {section.section || section.title || `Section ${index + 1}`}
+                                                    </h3>
+                                                    <p className="text-gray-700 leading-relaxed mb-4">
+                                                        {section.content || section.description || section.text}
+                                                    </p>
+                                                    {section.subsections && Array.isArray(section.subsections) && (
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {section.subsections.map((subsection: any, subIndex: number) => (
+                                                                <span
+                                                                    key={subIndex}
+                                                                    className="px-3 py-1 bg-gradient-to-r from-blue-100 to-purple-100 text-gray-700 rounded-full text-sm font-medium"
+                                                                >
+                                                                    {typeof subsection === 'string' ? subsection : subsection.title || subsection.name}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="border border-gray-200 rounded-xl p-6">
+                                                <div className="prose max-w-none">
+                                                    <p className="text-gray-700 leading-relaxed">
+                                                        {JSON.stringify(sectionData.breakdown.breakdown, null, 2)}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )
+                                    ) : (
+                                        <div className="text-center py-8">
+                                            <p className="text-gray-600">No detailed breakdown available or data is being processed.</p>
                                         </div>
-                                    ))}
+                                    )}
                                 </div>
                             </div>
                         </div>
