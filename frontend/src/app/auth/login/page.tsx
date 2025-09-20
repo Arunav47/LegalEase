@@ -6,7 +6,7 @@ import { Scale } from "lucide-react";
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 
 export default function LoginPage() {
-    const { isLoading } = useAuthGuard(false); // Don't require auth, but redirect if authenticated
+    const { isLoading } = useAuthGuard('auth-only'); // Auth-only page - redirect if authenticated
 
     if (isLoading) {
         return (
@@ -20,9 +20,9 @@ export default function LoginPage() {
         <>
             <div className="flex flex-col justify-center items-center min-h-screen bg-gray-100 pt-20">
                 <div className="mb-8 text-center">
-                    <h1 className="text-3xl font-bold mb-3 text-gray-800">Welcome Back to LegalEase AI</h1>
+                    <h1 className="text-3xl font-bold mb-3 text-gray-800">Welcome Back to LegalEase × Gemini</h1>
                     <span className="text-gray-600 text-lg max-w-md mx-auto block">
-                        Continue your journey of demystifying legal documents with artificial intelligence
+                        Continue your journey of demystifying legal documents with Google's advanced AI technology
                     </span>
                 </div>
 
