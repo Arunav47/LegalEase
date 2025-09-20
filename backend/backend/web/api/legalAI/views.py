@@ -13,6 +13,7 @@ import tempfile
 from pathlib import Path
 
 from backend.services.legalEaseAI.legalEaseAI import get_enhanced_legal_service
+from backend.services.supabase.supabase_upload import get_supabase_service
 
 logger = logging.getLogger(__name__)
 
@@ -58,9 +59,21 @@ class DatabaseStatsResponse(BaseModel):
     total_chunks: int
     error: Optional[str] = None
 
-# Dependency to get the legal service
+# Dependency to get the legal service (with clear init error reporting)
 def get_legal_service():
-    return get_enhanced_legal_service()
+    try:
+        return get_enhanced_legal_service()
+    except Exception as e:
+        logger.exception(f"Legal service initialization error: {e}")
+        raise HTTPException(status_code=500, detail=f"Legal service initialization error: {e}")
+
+# Wrapper to ensure dependency init errors become informative HTTP errors
+def get_sb_service():
+    try:
+        return get_supabase_service()
+    except Exception as e:
+        logger.exception(f"Supabase configuration error: {e}")
+        raise HTTPException(status_code=500, detail=f"Supabase configuration error: {e}")
 
 @router.post("/upload", response_model=DocumentUploadResponse)
 async def upload_document(
@@ -102,6 +115,72 @@ async def upload_document(
         raise
     except Exception as e:
         logger.error(f"Error uploading document: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/upload/supabase-first", response_model=DocumentUploadResponse)
+async def upload_document_supabase_first(
+    file: UploadFile = File(...),
+    document_id: Optional[str] = Form(None),
+    legal_service = Depends(get_legal_service),
+    supabase_service = Depends(get_sb_service),
+):
+    """
+    Upload the PDF to Supabase first to obtain/confirm a document_id, then process the
+    same file with the given document_id for AstraDB embeddings and analysis.
+    """
+    try:
+        # Validate file type
+        if not file.filename.lower().endswith('.pdf'):
+            raise HTTPException(status_code=400, detail="Only PDF files are supported")
+
+        # Create temporary file
+        with tempfile.NamedTemporaryFile(delete=False, suffix='.pdf') as temp_file:
+            content = await file.read()
+            temp_file.write(content)
+            temp_file_path = temp_file.name
+
+        try:
+            # 1) Upload to Supabase and get/confirm document_id
+            supa_res = supabase_service.upload_and_register_document(
+                file_path=temp_file_path,
+                original_filename=file.filename,
+                document_id=document_id,
+            )
+            if not supa_res.get("success"):
+                raise HTTPException(status_code=502, detail="Supabase upload failed")
+            doc_id = supa_res["document_id"]
+
+            # 2) Process with the same id into AstraDB (embeddings, chunking, etc.)
+            ai_res = await legal_service.upload_and_process_document(
+                file_path=temp_file_path,
+                document_id=doc_id,
+            )
+
+            if isinstance(ai_res, dict) and ai_res.get("success"):
+                stats = ai_res.get("statistics") or {}
+                # Annotate where it’s stored in Supabase
+                stats.update({
+                    "supabase_bucket": supa_res.get("storage_bucket"),
+                    "supabase_key": supa_res.get("storage_key"),
+                    "supabase_public_url": supa_res.get("public_url"),
+                })
+                return DocumentUploadResponse(
+                    success=True,
+                    document_id=doc_id,
+                    message="Uploaded to Supabase and processed into AstraDB.",
+                    statistics=stats,
+                )
+            else:
+                err = (ai_res or {}).get("error", "Processing failed")
+                raise HTTPException(status_code=500, detail=str(err))
+
+        finally:
+            Path(temp_file_path).unlink(missing_ok=True)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in supabase-first upload: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/documents/{document_id}/summary", response_model=AnalysisResponse)
@@ -334,11 +413,23 @@ async def get_document_status(
     try:
         result = await legal_service.get_document_status(document_id)
         
+        # Add 'exists' field if it's missing
+        if "exists" not in result:
+            # Determine if document exists based on error or other fields
+            if "error" in result:
+                result["exists"] = False
+            else:
+                result["exists"] = True
+        
         return DocumentStatusResponse(**result)
         
     except Exception as e:
         logger.error(f"Error getting document status: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        return DocumentStatusResponse(
+            exists=False,
+            document_id=document_id,
+            error=str(e)
+        )
 
 @router.delete("/documents/{document_id}")
 async def delete_document(

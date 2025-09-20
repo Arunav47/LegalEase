@@ -36,7 +36,7 @@ class LegalDocumentAnalysisWorkflow:
         self.astra_db = get_astra_db_service()
         self.vectorization_service = get_document_vectorization_service()
         self.llm = ChatGoogleGenerativeAI(
-            model="gemini-2.0-flash-exp",
+            model="gemini-2.5-flash",
             temperature=0.1
         )
         self.workflow = self._build_workflow()

@@ -6,6 +6,9 @@ from backend.services.documentAI.ocr_service import process_pdf_file, process_im
 import vertexai
 from vertexai.generative_models import GenerativeModel
 
+
+
+
 # Load environment variables
 load_dotenv()
 

@@ -50,12 +50,11 @@ class EnhancedLegalAnalysisService:
             
             if self.astra_db:
                 # Store chunks in vector database
-                success = await self.astra_db.store_document_chunks(doc_id, chunks)
-                
-                if not success:
+                store_res = await self.astra_db.store_document_chunks(doc_id, chunks)
+                if not store_res.get("success"):
                     return {
                         "success": False,
-                        "error": "Failed to store document in vector database"
+                        "error": store_res.get("error", "Failed to store document in vector database")
                     }
             
             # Calculate document statistics
@@ -202,7 +201,11 @@ class EnhancedLegalAnalysisService:
             
         except Exception as e:
             logger.error(f"Error getting document status: {e}")
-            return {"error": str(e)}
+            return {
+                "exists": False,
+                "document_id": document_id,
+                "error": str(e)
+            }
     
     async def delete_document(self, document_id: str) -> Dict[str, Any]:
         """Delete a document from the vector database"""

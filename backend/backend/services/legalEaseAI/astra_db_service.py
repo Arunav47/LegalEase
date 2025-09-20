@@ -5,7 +5,7 @@ Provides connection and vector operations for legal document analysis
 
 import os
 import logging
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any, Optional, Tuple, Union
 from astrapy import DataAPIClient
 from astrapy.collection import Collection
 import requests
@@ -60,7 +60,7 @@ class AstraDBService:
                 )
             
             # Get or create collection for legal documents
-            collection_name = "legal_documents"
+            collection_name = "legalease_rag"
             try:
                 self.collection = self.database.get_collection(collection_name)
             except Exception:
@@ -71,17 +71,21 @@ class AstraDBService:
                     metric="cosine"
                 )
             
-            # Initialize embedding model
-            api_key = settings.mistral_api_key or settings.gemini_api_key
+            # Initialize embedding model (require Mistral explicitly to match 1024-dim collection)
+            api_key = settings.mistral_api_key
             if not api_key:
-                raise ValueError("Missing Mistral API key. Please set MISTRAL_API_KEY or GEMINI_API_KEY in your environment.")
-            
+                raise ValueError(
+                    "Missing Mistral API key. Set MISTRAL_API_KEY in your environment. "
+                    "Note: Current configuration uses Mistral embeddings (1024 dims). "
+                    "Using GEMINI_API_KEY here is not supported without changing the embedding provider and collection dimension."
+                )
+
             self.embedding_model = MistralAIEmbeddings(api_key=api_key, model="mistral-embed")
             
             logger.info("Successfully connected to Astra DB")
             
         except Exception as e:
-            logger.error(f"Failed to initialize Astra DB connection: {e}")
+            logger.exception(f"Failed to initialize Astra DB connection: {e}")
             raise
     
     @lru_cache(maxsize=1000)
@@ -94,7 +98,7 @@ class AstraDBService:
         embedding = self.embedding_model.embed_query(text)
         return embedding
     
-    async def store_document_chunks(self, document_id: str, chunks: List[Dict[str, Any]]) -> bool:
+    async def store_document_chunks(self, document_id: str, chunks: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
         Store document chunks with embeddings in Astra DB
         
@@ -103,18 +107,24 @@ class AstraDBService:
             chunks: List of document chunks with metadata
             
         Returns:
-            bool: Success status
+            Dict[str, Any]: { success: bool, stored: int, error?: str }
         """
         try:
             if _ASTRA_DB_DISABLED:
                 logger.warning("Astra DB integration is disabled. Set ASTRA_DB_DISABLED=0 to enable.")
-                return False
+                return {"success": False, "stored": 0, "error": "Astra DB is disabled"}
             
             documents_to_insert = []
+            expected_dim = 1024  # Mistral 'mistral-embed' outputs 1024-dim
             
             for i, chunk in enumerate(chunks):
                 # Generate embedding for the chunk text
                 embedding = self.generate_embedding(chunk['text'])
+                # Validate embedding dimension
+                if not isinstance(embedding, list) or len(embedding) != expected_dim:
+                    msg = f"Embedding dimension mismatch: expected {expected_dim}, got {len(embedding) if isinstance(embedding, list) else 'unknown'}"
+                    logger.error(msg)
+                    return {"success": False, "stored": 0, "error": msg}
                 
                 # Prepare document for insertion
                 doc = {
@@ -131,15 +141,15 @@ class AstraDBService:
             
             # Insert documents in batch
             if documents_to_insert:
-                self.collection.insert_many(documents_to_insert)
+                res = self.collection.insert_many(documents_to_insert)
                 logger.info(f"Stored {len(documents_to_insert)} chunks for document {document_id}")
-                return True
-            
-            return False
+                return {"success": True, "stored": len(documents_to_insert)}
+
+            return {"success": False, "stored": 0, "error": "No documents to insert"}
             
         except Exception as e:
-            logger.error(f"Error storing document chunks: {e}")
-            return False
+            logger.exception(f"Error storing document chunks: {e}")
+            return {"success": False, "stored": 0, "error": str(e)}
     
     async def similarity_search(self, query: str, document_id: Optional[str] = None, 
                               limit: int = 5, min_score: float = 0.7) -> List[Dict[str, Any]]:
@@ -168,17 +178,17 @@ class AstraDBService:
             if document_id:
                 filter_dict["document_id"] = document_id
             
-            # Perform vector search
+            # Perform vector search using find with vector sort
             search_params = {
-                "vector": query_embedding,
                 "limit": limit,
-                "include_similarity": True
+                "include_similarity": True,
+                "sort": {"$vector": query_embedding}
             }
             
             if filter_dict:
                 search_params["filter"] = filter_dict
             
-            results = self.collection.vector_search(**search_params)
+            results = self.collection.find(**search_params)
             
             # Filter by minimum score and format results
             filtered_results = []
@@ -199,7 +209,7 @@ class AstraDBService:
             return filtered_results
             
         except Exception as e:
-            logger.error(f"Error performing similarity search: {e}")
+            logger.exception(f"Error performing similarity search: {e}")
             return []
     
     async def get_document_chunks(self, document_id: str) -> List[Dict[str, Any]]:
@@ -227,7 +237,7 @@ class AstraDBService:
             return chunks
             
         except Exception as e:
-            logger.error(f"Error retrieving document chunks: {e}")
+            logger.exception(f"Error retrieving document chunks: {e}")
             return []
     
     async def delete_document(self, document_id: str) -> bool:
@@ -244,7 +254,7 @@ class AstraDBService:
             return True
             
         except Exception as e:
-            logger.error(f"Error deleting document: {e}")
+            logger.exception(f"Error deleting document: {e}")
             return False
     
     def get_collection_stats(self) -> Dict[str, Any]:
@@ -272,7 +282,7 @@ class AstraDBService:
                 return {"total_documents": 0, "total_chunks": 0}
                 
         except Exception as e:
-            logger.error(f"Error getting collection stats: {e}")
+            logger.exception(f"Error getting collection stats: {e}")
             return {"total_documents": 0, "total_chunks": 0}
 
 # Global instance
