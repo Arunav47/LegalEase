@@ -19,11 +19,9 @@ export default function HomePage() {
     const [isUploading, setIsUploading] = useState(false);
 
     const documentHistory = [
-        { id: 1, name: "Employment_Contract_Tech_Corp.pdf", date: "2024-01-15", type: "Gemini Analysis" },
-        { id: 2, name: "Non_Disclosure_Agreement_Startup.pdf", date: "2024-01-14", type: "Vertex AI Review" },
-        { id: 3, name: "Lease_Agreement_Commercial.pdf", date: "2024-01-13", type: "Document AI Summary" },
-        { id: 4, name: "Partnership_Agreement_LLC.pdf", date: "2024-01-12", type: "Risk Assessment" },
-        { id: 5, name: "Intellectual_Property_License.pdf", date: "2024-01-11", type: "AutoML Analysis" },
+        { id: 2, name: "Non_Disclosure_Agreement_Startup.pdf", date: "2025-09-15", type: "" },
+        { id: 3, name: "Lease_Agreement_Commercial.pdf", date: "2025-09-10", type: "" },
+        { id: 5, name: "Intellectual_Property_License.pdf", date: "2025-09-05", type: "" },
     ];
 
     const searchResults = [
@@ -98,8 +96,16 @@ export default function HomePage() {
 
     const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
-        if (file && validateFile(file)) {
-            setUploadFile(file);
+        if (file) {
+            console.log('File selected:', file.name, file.type, file.size);
+            if (validateFile(file)) {
+                setUploadFile(file);
+                console.log('File validation passed, uploadFile set');
+            } else {
+                console.log('File validation failed');
+            }
+        } else {
+            console.log('No file selected');
         }
     };
 
@@ -113,6 +119,9 @@ export default function HomePage() {
             setShowUpload(false);
             setUploadFile(null);
             setUploadError('');
+
+            // Redirect to document page to show the mockup
+            router.push('/document/new-upload');
         } catch (error) {
             setUploadError('Upload failed. Please try again.');
         } finally {
@@ -122,8 +131,11 @@ export default function HomePage() {
 
     const toggleUpload = () => {
         setShowUpload(!showUpload);
-        setUploadFile(null);
-        setUploadError('');
+        if (!showUpload) {
+            // Only clear when opening the modal
+            setUploadFile(null);
+            setUploadError('');
+        }
     };
 
     const handleDocumentClick = (docId: number) => {
@@ -161,7 +173,7 @@ export default function HomePage() {
                         </p>
                         <ResponsiveSearchBar
                             onSearch={handleSearch}
-                            placeholder="Upload or search legal documents - Ask anything in plain English..."
+                            placeholder="search documents"
                         />
                         <div className="mt-6">
                             <button
@@ -301,26 +313,21 @@ export default function HomePage() {
                                     <button
                                         onClick={submitUpload}
                                         disabled={!uploadFile || isUploading}
-                                        className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                        className={`flex-1 px-6 py-3 rounded-lg font-medium transition-all duration-200 ${!uploadFile || isUploading
+                                            ? 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                                            : 'bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white hover:shadow-lg'
+                                            }`}
                                     >
                                         {isUploading ? (
                                             <div className="flex items-center justify-center">
                                                 <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                                                Uploading...
+                                                Analyzing with Gemini...
                                             </div>
-                                        ) : 'Upload Document'}
+                                        ) : !uploadFile ? 'Select a file first' : 'Upload & Analyze Document'}
                                     </button>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-30">
-                    <div
-                        className={`bg-white rounded-full px-6 py-3 text-black text-base font-medium transition-opacity duration-300 ${scrollY > 10 || showResults ? 'opacity-0' : 'opacity-100'}`}
-                    >
-                        Scroll up to view document history
                     </div>
                 </div>
 
