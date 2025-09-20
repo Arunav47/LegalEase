@@ -8,9 +8,11 @@ import logging
 from typing import List, Dict, Any, Optional
 from astrapy import DataAPIClient
 from astrapy.collection import Collection
-from sentence_transformers import SentenceTransformer
+import requests
 import asyncio
 from functools import lru_cache
+from langchain_mistralai import MistralAIEmbeddings
+from backend.settings import settings
 
 logger = logging.getLogger(__name__)
 
@@ -27,10 +29,10 @@ class AstraDBService:
     def _initialize_connection(self):
         """Initialize connection to Astra DB"""
         try:
-            # Get Astra DB credentials from environment
-            astra_db_token = os.getenv("ASTRA_DB_APPLICATION_TOKEN")
-            astra_db_id = os.getenv("ASTRA_DB_ID")
-            astra_db_endpoint = os.getenv("ASTRA_DB_ENDPOINT")
+            # Get Astra DB credentials from settings
+            astra_db_token = settings.astra_db_application_token
+            astra_db_id = settings.astra_db_id
+            astra_db_endpoint = settings.astra_db_endpoint
             
             if not all([astra_db_token, astra_db_id]):
                 raise ValueError("Missing Astra DB credentials. Please set ASTRA_DB_APPLICATION_TOKEN and ASTRA_DB_ID")
@@ -43,7 +45,7 @@ class AstraDBService:
                 self.database = self.client.get_database(astra_db_endpoint)
             else:
                 self.database = self.client.get_database_by_api_endpoint(
-                    f"https://{astra_db_id}-{os.getenv('ASTRA_DB_REGION', 'us-east1')}.apps.astra.datastax.com"
+                    f"https://{astra_db_id}-{settings.astra_db_region or 'us-east1'}.apps.astra.datastax.com"
                 )
             
             # Get or create collection for legal documents
@@ -54,12 +56,16 @@ class AstraDBService:
                 # Create collection if it doesn't exist
                 self.collection = self.database.create_collection(
                     collection_name,
-                    dimension=384,  # sentence-transformers/all-MiniLM-L6-v2 dimension
+                    dimension=1024,  # Mistral embeddings dimension
                     metric="cosine"
                 )
             
             # Initialize embedding model
-            self.embedding_model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+            api_key = settings.mistral_api_key or settings.gemini_api_key
+            if not api_key:
+                raise ValueError("Missing Mistral API key. Please set MISTRAL_API_KEY or GEMINI_API_KEY in your environment.")
+            
+            self.embedding_model = MistralAIEmbeddings(api_key=api_key, model="mistral-embed")
             
             logger.info("Successfully connected to Astra DB")
             
@@ -73,8 +79,9 @@ class AstraDBService:
         if not self.embedding_model:
             raise RuntimeError("Embedding model not initialized")
         
-        embedding = self.embedding_model.encode(text, convert_to_tensor=False)
-        return embedding.tolist()
+        # Mistral embeddings through LangChain returns a list of floats directly
+        embedding = self.embedding_model.embed_query(text)
+        return embedding
     
     async def store_document_chunks(self, document_id: str, chunks: List[Dict[str, Any]]) -> bool:
         """
