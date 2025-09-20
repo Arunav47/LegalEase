@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Mail, Lock, User, CheckCircle, Eye, EyeOff, Info } from "lucide-react";
 import { useState } from "react";
 import { motion } from "motion/react";
+import { useRouter } from "next/navigation";
 import { auth } from "@/lib/firebase";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
 
@@ -15,6 +16,7 @@ export default function SignUpForm() {
     });
     const [passwordVisible, setPasswordVisible] = useState(false);
     const [error, setError] = useState("");
+    const router = useRouter();
 
     const validatePassword = (password: string) => {
         const minLength = /.{8,}/;
@@ -41,7 +43,7 @@ export default function SignUpForm() {
             await createUserWithEmailAndPassword(auth, formData.email, formData.password);
             console.log("Signup successful");
             await signInWithEmailAndPassword(auth, formData.email, formData.password);
-            window.location.href = "/home";
+            router.replace("/home"); // Use replace to prevent back navigation
         } catch (err: any) {
             console.error("Firebase Error:", err.message);
             setError("Unable to create account. Please try again.");
