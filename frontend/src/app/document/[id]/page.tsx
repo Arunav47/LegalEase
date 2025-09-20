@@ -5,7 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
 
 export default function DocumentPage() {
-    const { isLoading, isAuthenticated } = useAuthGuard(true);
+    const { isLoading, isAuthenticated } = useAuthGuard('protected');
     const params = useParams();
     const router = useRouter();
     const [documentData, setDocumentData] = useState<any>(null);
@@ -16,7 +16,7 @@ export default function DocumentPage() {
     const [chatMessages, setChatMessages] = useState<Array<{ id: number, text: string, sender: 'user' | 'bot', timestamp: Date }>>([
         {
             id: 1,
-            text: "Hello! I'm your document assistant. Ask me anything about this document and I'll help you understand it better.",
+            text: "Hello! I'm your Gemini-powered document assistant. Ask me anything about this document and I'll use Google's advanced AI to help you understand it better.",
             sender: 'bot',
             timestamp: new Date()
         }
@@ -27,7 +27,7 @@ export default function DocumentPage() {
     const mockDocumentData = {
         id: params.id,
         name: "Employment_Agreement_TechCorp_2024.pdf",
-        type: "Contract Analysis",
+        type: "Gemini Deep Analysis",
         uploadDate: "2024-01-15",
         status: "AI Analyzed",
         summary: "This employment agreement establishes the working relationship between TechCorp Inc. and a Senior Software Engineer. The AI analysis reveals key provisions including competitive compensation ($120,000 base + equity), comprehensive benefits, intellectual property assignments, and standard non-compete clauses. Notable features include remote work flexibility, professional development allowances, and performance-based bonuses. The contract includes robust confidentiality provisions and clear termination procedures with 60-day notice requirements.",
@@ -248,11 +248,11 @@ export default function DocumentPage() {
                     <div className="mb-6">
                         <nav className="flex space-x-1 bg-white rounded-xl p-1 shadow-sm border">
                             {[
-                                { id: 'overview', label: '🧠 AI Overview', icon: '🤖' },
-                                { id: 'clauses', label: 'Key Clauses', icon: '🔑' },
-                                { id: 'dates', label: 'Important Dates', icon: '📅' },
-                                { id: 'locations', label: 'Places & Jurisdiction', icon: '📍' },
-                                { id: 'breakdown', label: 'Detailed Analysis', icon: '📊' }
+                                { id: 'overview', label: 'Gemini Overview', icon: '' },
+                                { id: 'clauses', label: 'Key Clauses', icon: '' },
+                                { id: 'dates', label: 'Important Dates', icon: '' },
+                                { id: 'locations', label: 'Places & Jurisdiction', icon: '' },
+                                { id: 'breakdown', label: 'Vertex AI Analysis', icon: '' }
                             ].map((section) => (
                                 <button
                                     key={section.id}
@@ -262,7 +262,7 @@ export default function DocumentPage() {
                                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                                         }`}
                                 >
-                                    <span className="mr-2">{section.icon}</span>
+                                    {section.icon && <span className="mr-2">{section.icon}</span>}
                                     {section.label}
                                 </button>
                             ))}
@@ -273,7 +273,7 @@ export default function DocumentPage() {
                         <div className="space-y-6">
                             <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 backdrop-blur-sm bg-opacity-95">
                                 <div className="flex items-center justify-between mb-6">
-                                    <h2 className="text-2xl font-bold text-gray-900">🤖 AI Document Analysis</h2>
+                                    <h2 className="text-2xl font-bold text-gray-900">Gemini Document Intelligence</h2>
                                     <button
                                         onClick={handleAudioPlay}
                                         className={`flex items-center px-6 py-3 rounded-full text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 ${isPlaying
@@ -287,14 +287,14 @@ export default function DocumentPage() {
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 10h6v4H9z" />
                                                 </svg>
-                                                🔇 Stop Voice Summary
+                                                Stop Google TTS
                                             </>
                                         ) : (
                                             <>
                                                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
                                                 </svg>
-                                                🎵 Listen to AI Summary
+                                                Listen with Google Text-to-Speech
                                             </>
                                         )}
                                     </button>
@@ -303,7 +303,7 @@ export default function DocumentPage() {
                                     <p className="text-gray-700 leading-relaxed text-lg">{documentData?.summary}</p>
                                     <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
                                         <p className="text-sm text-blue-800">
-                                            <strong>🎯 AI Analysis Complete:</strong> This document has been processed using advanced natural language processing to extract key insights, identify risks, and highlight important provisions in plain English.
+                                            <strong>Gemini Analysis Complete:</strong> This document has been processed using Google's most advanced language model and Vertex AI Document Processing to extract key insights, identify risks, and highlight important provisions in plain English.
                                         </p>
                                     </div>
                                 </div>
@@ -350,9 +350,9 @@ export default function DocumentPage() {
                                                         dateItem.type === 'review' ? 'bg-purple-500' :
                                                             'bg-orange-500'
                                                     }`}>
-                                                    {dateItem.type === 'start' ? '🚀' :
-                                                        dateItem.type === 'milestone' ? '🎯' :
-                                                            dateItem.type === 'review' ? '📊' : '🔄'}
+                                                    {dateItem.type === 'start' ? 'START' :
+                                                        dateItem.type === 'milestone' ? 'MILE' :
+                                                            dateItem.type === 'review' ? 'REV' : 'UPD'}
                                                 </div>
                                             </div>
                                             <div className="flex-grow">
@@ -388,8 +388,8 @@ export default function DocumentPage() {
                                                     location.type === 'remote' ? 'bg-green-500' :
                                                         'bg-purple-500'
                                                     }`}>
-                                                    {location.type === 'workplace' ? '🏢' :
-                                                        location.type === 'remote' ? '🏠' : '⚖️'}
+                                                    {location.type === 'workplace' ? 'WRK' :
+                                                        location.type === 'remote' ? 'RMT' : 'LEG'}
                                                 </div>
                                                 <div className="flex-grow">
                                                     <h3 className="text-lg font-semibold text-gray-900">{location.place}</h3>
