@@ -8,6 +8,43 @@ import vertexai
 from vertexai.generative_models import GenerativeModel
 from dotenv import load_dotenv
 
+
+def process_pdf_file(pdf_bytes: bytes) -> dict:
+    """Process PDF with PyMuPDF + fallback OCR for scanned PDFs."""
+
+    doc = fitz.open(stream=pdf_bytes, filetype="pdf")
+    all_text = []
+
+    for page in doc:
+        text = page.get_text("text")  # extract embedded text if available
+        if not text.strip():
+            # Fallback → render page as image + OCR
+            pix = page.get_pixmap()
+            img = Image.open(BytesIO(pix.tobytes("png")))
+            text = pytesseract.image_to_string(img)
+        all_text.append(text)
+
+    extracted_text = "\n".join(all_text)
+    doc.close()
+
+    return {
+        "full_text": extracted_text,
+        "text_length": len(extracted_text),
+        "preview": extracted_text[:500],
+    }
+
+
+def process_image_file(image_bytes: bytes) -> dict:
+    """Process image with Tesseract OCR and return extracted text + metadata."""
+    image = Image.open(BytesIO(image_bytes))
+    extracted_text = pytesseract.image_to_string(image)
+
+    return {
+        "full_text": extracted_text,
+        "text_length": len(extracted_text),
+        "preview": extracted_text[:500],
+    }
+
 # Load environment variables
 load_dotenv()
 
@@ -17,10 +54,13 @@ load_dotenv()
 # Vertex AI configuration
 PROJECT_ID = os.getenv("PROJECT_ID")
 LOCATION = os.getenv("LOCATION", "us-central1")
-os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+_creds = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+if _creds:
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = _creds
 
-# Initialize Vertex AI
-vertexai.init(project=PROJECT_ID, location=LOCATION)
+# Initialize Vertex AI (only if PROJECT_ID is set)
+if PROJECT_ID:
+    vertexai.init(project=PROJECT_ID, location=LOCATION)
 
 def pdf_to_images(pdf_path: Path, dpi: int = 300):
     """Convert PDF pages to PIL Images."""
@@ -92,8 +132,12 @@ def explain_with_vertex_ai(text: str, prompt_type: str = "summarize") -> str:
     selected_prompt = prompts.get(prompt_type, prompts["summarize"])
     
     try:
-        # Use Vertex AI Gemini model
-        model = GenerativeModel("gemini-1.5-flash")
+        if PROJECT_ID:
+            # Safe to call multiple times; init is idempotent
+            vertexai.init(project=PROJECT_ID, location=LOCATION)
+        else:
+            return "Error generating explanation: Missing PROJECT_ID for Vertex AI."
+        model = GenerativeModel("gemini-2.5-flash")
         response = model.generate_content(selected_prompt)
         return response.text
     except Exception as e:
