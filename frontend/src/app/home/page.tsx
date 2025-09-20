@@ -19,17 +19,17 @@ export default function HomePage() {
     const [isUploading, setIsUploading] = useState(false);
 
     const documentHistory = [
-        { id: 1, name: "Contract_Analysis_Report.pdf", date: "2024-01-15", type: "Contract Analysis" },
-        { id: 2, name: "Legal_Research_Summary.docx", date: "2024-01-14", type: "Legal Research" },
-        { id: 3, name: "NDA_Review.pdf", date: "2024-01-13", type: "Document Review" },
-        { id: 4, name: "Employment_Agreement.pdf", date: "2024-01-12", type: "Contract Analysis" },
-        { id: 5, name: "Patent_Application.pdf", date: "2024-01-11", type: "IP Analysis" },
+        { id: 1, name: "Employment_Contract_Tech_Corp.pdf", date: "2024-01-15", type: "Contract Analysis" },
+        { id: 2, name: "Non_Disclosure_Agreement_Startup.pdf", date: "2024-01-14", type: "Legal Review" },
+        { id: 3, name: "Lease_Agreement_Commercial.pdf", date: "2024-01-13", type: "Document Summary" },
+        { id: 4, name: "Partnership_Agreement_LLC.pdf", date: "2024-01-12", type: "Risk Assessment" },
+        { id: 5, name: "Intellectual_Property_License.pdf", date: "2024-01-11", type: "IP Analysis" },
     ];
 
     const searchResults = [
-        { id: 1, title: "Contract Clause Analysis", snippet: "Found 15 potential issues in the liability section..." },
-        { id: 2, title: "Legal Precedent Match", snippet: "Similar case found: Smith vs. Johnson (2023)..." },
-        { id: 3, title: "Compliance Check", snippet: "Document complies with GDPR requirements..." },
+        { id: 1, title: "Contract Termination Clauses", snippet: "AI identified 3 termination clauses with different notice periods. Clause 5.2 requires 30 days notice, while clause 8.1 allows immediate termination for breach..." },
+        { id: 2, title: "Liability Limitations Found", snippet: "Document contains liability caps limiting damages to $50,000. This may be insufficient for your business size. Similar contracts typically include..." },
+        { id: 3, title: "Intellectual Property Rights", snippet: "All work-for-hire clauses transfer IP ownership to the company. Employee retains rights only to pre-existing inventions listed in Exhibit A..." },
     ];
 
     useEffect(() => {
@@ -157,19 +157,22 @@ export default function HomePage() {
                             LegalEase AI
                         </h1>
                         <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-                            Your intelligent legal assistant. Search documents, analyze contracts, and get instant legal insights.
+                            Demystify complex legal documents with AI. Get instant summaries, voice explanations, mind maps, and intelligent Q&A for contracts, agreements, and legal papers in any language.
                         </p>
                         <ResponsiveSearchBar
                             onSearch={handleSearch}
-                            placeholder="Ask LegalEase anything about your documents..."
+                            placeholder="Upload or search legal documents - Ask anything in plain English..."
                         />
                         <div className="mt-6">
                             <button
                                 onClick={toggleUpload}
                                 className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-3 rounded-full text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                             >
-                                Upload New Document
+                                📄 Upload Legal Document
                             </button>
+                            <p className="text-sm text-gray-500 mt-2">
+                                AI will instantly analyze, summarize & create interactive insights
+                            </p>
                         </div>
                     </div>
                 </div>
@@ -179,7 +182,10 @@ export default function HomePage() {
                 >
                     <div className="h-full overflow-y-auto pt-20 pb-8">
                         <div className="max-w-4xl mx-auto px-4">
-                            <h2 className="text-3xl font-bold text-white mb-8 text-center">Document History</h2>
+                            <h2 className="text-3xl font-bold text-white mb-4 text-center">Your AI-Analyzed Documents</h2>
+                            <p className="text-center text-gray-300 mb-8">
+                                Each document processed with advanced AI for summaries, risk analysis, and intelligent insights
+                            </p>
                             <div className="grid gap-4">
                                 {documentHistory.map((doc) => (
                                     <div
@@ -215,7 +221,10 @@ export default function HomePage() {
                 >
                     <div className="h-full overflow-y-auto pt-20 pb-8">
                         <div className="max-w-4xl mx-auto px-4">
-                            <h2 className="text-3xl font-bold text-white mb-8 text-center">Search Results for "{searchQuery}"</h2>
+                            <h2 className="text-3xl font-bold text-white mb-4 text-center">Smart Search Results</h2>
+                            <p className="text-center text-gray-300 mb-8">
+                                AI-powered insights and analysis for: "{searchQuery}"
+                            </p>
                             <div className="grid gap-4">
                                 {searchResults.map((result) => (
                                     <div
