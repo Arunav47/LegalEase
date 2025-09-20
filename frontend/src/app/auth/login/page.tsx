@@ -20,9 +20,9 @@ export default function LoginPage() {
         <>
             <div className="flex flex-col justify-center items-center min-h-screen bg-gray-100 pt-20">
                 <div className="mb-8 text-center">
-                    <h1 className="text-3xl font-bold mb-3 text-gray-800">Securely Log In</h1>
+                    <h1 className="text-3xl font-bold mb-3 text-gray-800">Welcome Back to LegalEase AI</h1>
                     <span className="text-gray-600 text-lg max-w-md mx-auto block">
-                        Welcome back to LegalEase. Please enter your credentials
+                        Continue your journey of demystifying legal documents with artificial intelligence
                     </span>
                 </div>
 
