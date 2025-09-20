@@ -26,68 +26,80 @@ export default function DocumentPage() {
 
     const mockDocumentData = {
         id: params.id,
-        name: "Employment Agreement - John Doe.pdf",
+        name: "Employment_Agreement_TechCorp_2024.pdf",
         type: "Contract Analysis",
         uploadDate: "2024-01-15",
-        status: "Analyzed",
-        summary: "This employment agreement outlines the terms and conditions of employment for John Doe as a Software Engineer at Tech Solutions Inc. The contract includes standard clauses for compensation, benefits, intellectual property rights, non-disclosure agreements, and termination procedures. Key provisions include a base salary of $95,000, equity participation, and a 6-month notice period for termination.",
+        status: "AI Analyzed",
+        summary: "This employment agreement establishes the working relationship between TechCorp Inc. and a Senior Software Engineer. The AI analysis reveals key provisions including competitive compensation ($120,000 base + equity), comprehensive benefits, intellectual property assignments, and standard non-compete clauses. Notable features include remote work flexibility, professional development allowances, and performance-based bonuses. The contract includes robust confidentiality provisions and clear termination procedures with 60-day notice requirements.",
         keyClauses: [
             {
-                title: "Compensation Package",
-                content: "Base salary of $95,000 annually, plus performance-based bonuses up to 20% of base salary",
+                title: "Compensation & Benefits Package",
+                content: "Base salary: $120,000 annually, 15% performance bonus potential, equity participation (0.25%), health/dental/vision coverage, $3,000 professional development budget",
                 type: "financial",
                 importance: "high"
             },
             {
-                title: "Intellectual Property Rights",
-                content: "All work products, inventions, and intellectual property created during employment belong to the company",
+                title: "Intellectual Property Assignment",
+                content: "All work products, code, inventions, and discoveries made during employment become company property. Employee must disclose pre-existing IP in Schedule A",
                 type: "legal",
                 importance: "critical"
             },
             {
-                title: "Non-Disclosure Agreement",
-                content: "Employee agrees to maintain confidentiality of proprietary information for 2 years post-employment",
+                title: "Non-Disclosure & Confidentiality",
+                content: "Comprehensive NDA covering proprietary information, customer data, business strategies. Obligations continue 3 years post-employment",
                 type: "confidentiality",
                 importance: "high"
             },
             {
-                title: "Termination Clause",
-                content: "Either party may terminate with 6 months written notice, or immediately for cause",
+                title: "Termination & Notice Provisions",
+                content: "Either party may terminate with 60 days written notice. Immediate termination allowed for cause. Severance: 2 months salary if terminated without cause",
                 type: "termination",
+                importance: "medium"
+            },
+            {
+                title: "Remote Work & Flexibility",
+                content: "Hybrid work model: 3 days in office, 2 days remote. Flexible hours between 7 AM - 7 PM core collaboration time. International remote work requires approval",
+                type: "operational",
                 importance: "medium"
             }
         ],
         importantDates: [
-            { date: "2024-02-01", event: "Employment Start Date", type: "start" },
-            { date: "2024-08-01", event: "Probationary Period End", type: "milestone" },
-            { date: "2025-01-31", event: "First Annual Review", type: "review" },
-            { date: "2026-01-31", event: "Contract Renewal Due", type: "renewal" }
+            { date: "2024-03-01", event: "Employment Start Date", type: "start" },
+            { date: "2024-09-01", event: "Probationary Period End (6 months)", type: "milestone" },
+            { date: "2025-03-01", event: "First Annual Performance Review", type: "review" },
+            { date: "2025-03-01", event: "Salary Review & Adjustment", type: "financial" },
+            { date: "2026-03-01", event: "Contract Renewal Consideration", type: "renewal" },
+            { date: "2024-12-31", event: "Annual Equity Vesting (25%)", type: "equity" }
         ],
         locations: [
-            { place: "Tech Solutions Inc. Headquarters", address: "123 Innovation Drive, San Francisco, CA", type: "workplace" },
-            { place: "Remote Work Locations", address: "As approved by management", type: "remote" },
-            { place: "Legal Jurisdiction", address: "State of California", type: "legal" }
+            { place: "TechCorp Headquarters", address: "500 Innovation Drive, Austin, TX 78701", type: "workplace" },
+            { place: "Austin Tech District Office", address: "1200 Barton Springs Rd, Austin, TX 78704", type: "workplace" },
+            { place: "Approved Remote Locations", address: "US-based locations with reliable internet", type: "remote" },
+            { place: "Legal Jurisdiction", address: "State of Texas, Travis County", type: "legal" }
         ],
         detailedBreakdown: [
             {
-                section: "Employment Terms",
-                content: "Full-time employment as Software Engineer with standard 40-hour work week. Position reports to Engineering Manager with opportunities for career advancement.",
-                subsections: ["Job Description", "Reporting Structure", "Work Schedule"]
+                section: "Employment Structure & Responsibilities",
+                content: "Full-time Senior Software Engineer position reporting to Engineering Manager. Primary focus on backend systems, API development, and cloud infrastructure. Expected to mentor junior developers and contribute to architectural decisions. Standard 40-hour work week with on-call rotation participation.",
+                subsections: ["Job Title & Level", "Reporting Structure", "Core Responsibilities", "Work Schedule", "On-Call Duties"]
             },
             {
-                section: "Compensation & Benefits",
-                content: "Comprehensive package including base salary, equity participation, health insurance, dental coverage, vision care, 401(k) matching, and professional development allowance.",
-                subsections: ["Base Salary", "Equity", "Health Benefits", "Retirement", "Professional Development"]
+                section: "Comprehensive Compensation Analysis",
+                content: "Total compensation package valued at $145,000+ annually. Includes competitive base salary, performance bonuses, equity participation with 4-year vesting schedule, comprehensive health benefits, retirement matching, and professional development opportunities. Package benchmarked against Austin tech market standards.",
+                subsections: ["Base Salary", "Bonus Structure", "Equity Package", "Health Benefits", "Retirement Plans", "Professional Development"]
             },
             {
-                section: "Legal Obligations",
-                content: "Standard legal clauses covering confidentiality, non-compete (where legally enforceable), intellectual property assignment, and dispute resolution procedures.",
-                subsections: ["Confidentiality", "Non-Compete", "IP Assignment", "Dispute Resolution"]
+                section: "Legal Rights & Obligations",
+                content: "Standard employment law protections with additional tech industry considerations. Includes work-for-hire IP assignments, reasonable non-compete provisions (limited to direct competitors in Austin metro), comprehensive confidentiality agreements, and dispute resolution through binding arbitration.",
+                subsections: ["IP Assignment", "Non-Compete Clause", "Confidentiality", "Dispute Resolution", "Termination Rights"]
+            },
+            {
+                section: "Benefits & Perquisites Analysis",
+                content: "Excellent benefits package including premium healthcare (100% employee, 80% family coverage), dental, vision, $50/month wellness stipend, flexible PTO policy, 12 weeks parental leave, sabbatical program after 5 years, and stock purchase plan with 15% discount.",
+                subsections: ["Healthcare Coverage", "PTO Policy", "Parental Leave", "Wellness Programs", "Stock Purchase Plan", "Sabbatical Program"]
             }
         ]
-    };
-
-    useEffect(() => {
+    }; useEffect(() => {
         const fetchDocument = async () => {
             setLoadingDocument(true);
             try {
@@ -236,10 +248,10 @@ export default function DocumentPage() {
                     <div className="mb-6">
                         <nav className="flex space-x-1 bg-white rounded-xl p-1 shadow-sm border">
                             {[
-                                { id: 'overview', label: 'Overview', icon: '📋' },
+                                { id: 'overview', label: '🧠 AI Overview', icon: '🤖' },
                                 { id: 'clauses', label: 'Key Clauses', icon: '🔑' },
                                 { id: 'dates', label: 'Important Dates', icon: '📅' },
-                                { id: 'locations', label: 'Places', icon: '📍' },
+                                { id: 'locations', label: 'Places & Jurisdiction', icon: '📍' },
                                 { id: 'breakdown', label: 'Detailed Analysis', icon: '📊' }
                             ].map((section) => (
                                 <button
@@ -261,7 +273,7 @@ export default function DocumentPage() {
                         <div className="space-y-6">
                             <div className="bg-white rounded-2xl shadow-xl border border-gray-200 p-8 backdrop-blur-sm bg-opacity-95">
                                 <div className="flex items-center justify-between mb-6">
-                                    <h2 className="text-2xl font-bold text-gray-900">Document Overview</h2>
+                                    <h2 className="text-2xl font-bold text-gray-900">🤖 AI Document Analysis</h2>
                                     <button
                                         onClick={handleAudioPlay}
                                         className={`flex items-center px-6 py-3 rounded-full text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 ${isPlaying
@@ -275,20 +287,25 @@ export default function DocumentPage() {
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 10h6v4H9z" />
                                                 </svg>
-                                                Stop Audio
+                                                🔇 Stop Voice Summary
                                             </>
                                         ) : (
                                             <>
                                                 <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
                                                 </svg>
-                                                Play Summary
+                                                🎵 Listen to AI Summary
                                             </>
                                         )}
                                     </button>
                                 </div>
                                 <div className="prose max-w-none">
                                     <p className="text-gray-700 leading-relaxed text-lg">{documentData?.summary}</p>
+                                    <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
+                                        <p className="text-sm text-blue-800">
+                                            <strong>🎯 AI Analysis Complete:</strong> This document has been processed using advanced natural language processing to extract key insights, identify risks, and highlight important provisions in plain English.
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
