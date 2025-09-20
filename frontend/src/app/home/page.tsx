@@ -109,7 +109,7 @@ export default function HomePage() {
                 </div>
 
                 <div
-                    className={`fixed inset-0 z-20 transition-all duration-300 ease-in-out ${showHistory ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-full pointer-events-none'} bg-black bg-opacity-30`}
+                    className={`fixed inset-0 z-20 transition-all duration-300 ease-in-out ${showHistory ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-full pointer-events-none'} bg-gray-900 bg-opacity-95`}
                 >
                     <div className="h-full overflow-y-auto pt-20 pb-8">
                         <div className="max-w-4xl mx-auto px-4">
@@ -118,16 +118,16 @@ export default function HomePage() {
                                 {documentHistory.map((doc) => (
                                     <div
                                         key={doc.id}
-                                        className="bg-white bg-opacity-20 rounded-lg p-6 border border-white border-opacity-30 hover:bg-opacity-30 transition-all duration-200 cursor-pointer"
+                                        className="bg-white bg-opacity-95 rounded-xl p-6 border border-gray-200 hover:shadow-xl transition-all duration-300 cursor-pointer backdrop-blur-sm hover:scale-[1.02]"
                                     >
                                         <div className="flex justify-between items-start">
                                             <div>
-                                                <h3 className="text-xl font-semibold text-white mb-2">{doc.name}</h3>
-                                                <p className="text-gray-300 mb-1">{doc.type}</p>
-                                                <p className="text-gray-400 text-sm">{new Date(doc.date).toLocaleDateString()}</p>
+                                                <h3 className="text-xl font-semibold text-black mb-2">{doc.name}</h3>
+                                                <p className="text-gray-600 mb-1 font-medium">{doc.type}</p>
+                                                <p className="text-gray-500 text-sm">{new Date(doc.date).toLocaleDateString()}</p>
                                             </div>
-                                            <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm transition-colors">
-                                                View Analysis
+                                            <button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-full text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
+                                                View Analytics
                                             </button>
                                         </div>
                                     </div>
@@ -138,7 +138,7 @@ export default function HomePage() {
                 </div>
 
                 <div
-                    className={`fixed inset-0 z-20 transition-all duration-300 ease-in-out ${showResults ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-full pointer-events-none'} bg-black bg-opacity-30`}
+                    className={`fixed inset-0 z-20 transition-all duration-300 ease-in-out ${showResults ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-full pointer-events-none'} bg-gray-900 bg-opacity-95`}
                 >
                     <div className="h-full overflow-y-auto pt-20 pb-8">
                         <div className="max-w-4xl mx-auto px-4">
@@ -147,10 +147,17 @@ export default function HomePage() {
                                 {searchResults.map((result) => (
                                     <div
                                         key={result.id}
-                                        className="bg-white bg-opacity-20 rounded-lg p-6 border border-white border-opacity-30 hover:bg-opacity-30 transition-all duration-200 cursor-pointer"
+                                        className="bg-white bg-opacity-95 rounded-xl p-6 border border-gray-200 hover:shadow-xl transition-all duration-300 cursor-pointer backdrop-blur-sm hover:scale-[1.02]"
                                     >
-                                        <h3 className="text-xl font-semibold text-white mb-2">{result.title}</h3>
-                                        <p className="text-gray-300">{result.snippet}</p>
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex-1">
+                                                <h3 className="text-xl font-semibold text-black mb-3">{result.title}</h3>
+                                                <p className="text-gray-600 leading-relaxed">{result.snippet}</p>
+                                            </div>
+                                            <button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-full text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 ml-4">
+                                                View Analytics
+                                            </button>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
