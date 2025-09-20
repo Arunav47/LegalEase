@@ -2,15 +2,21 @@
 
 import { useAuthGuard } from "@/app/hooks/useAuthGuard";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Threads from "@/app/ui/Threads";
 import ResponsiveSearchBar from "@/app/ui/ResponsiveSearchBar";
 
 export default function HomePage() {
     const { isLoading, isAuthenticated } = useAuthGuard(true);
+    const router = useRouter();
     const [scrollY, setScrollY] = useState(0);
     const [searchQuery, setSearchQuery] = useState("");
     const [showHistory, setShowHistory] = useState(false);
     const [showResults, setShowResults] = useState(false);
+    const [showUpload, setShowUpload] = useState(false);
+    const [uploadFile, setUploadFile] = useState<File | null>(null);
+    const [uploadError, setUploadError] = useState("");
+    const [isUploading, setIsUploading] = useState(false);
 
     const documentHistory = [
         { id: 1, name: "Contract_Analysis_Report.pdf", date: "2024-01-15", type: "Contract Analysis" },
@@ -72,6 +78,58 @@ export default function HomePage() {
         setShowResults(false);
     };
 
+    const validateFile = (file: File): boolean => {
+        const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png', 'text/plain'];
+        const maxSize = 100 * 1024 * 1024;
+
+        if (!allowedTypes.includes(file.type)) {
+            setUploadError('Please upload only PDF, JPEG, PNG, or TXT files');
+            return false;
+        }
+
+        if (file.size > maxSize) {
+            setUploadError('File size must be less than 100MB');
+            return false;
+        }
+
+        setUploadError('');
+        return true;
+    };
+
+    const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (file && validateFile(file)) {
+            setUploadFile(file);
+        }
+    };
+
+    const submitUpload = async () => {
+        if (!uploadFile) return;
+
+        setIsUploading(true);
+
+        try {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            setShowUpload(false);
+            setUploadFile(null);
+            setUploadError('');
+        } catch (error) {
+            setUploadError('Upload failed. Please try again.');
+        } finally {
+            setIsUploading(false);
+        }
+    };
+
+    const toggleUpload = () => {
+        setShowUpload(!showUpload);
+        setUploadFile(null);
+        setUploadError('');
+    };
+
+    const handleDocumentClick = (docId: number) => {
+        router.push(`/document/${docId}`);
+    };
+
     if (isLoading) {
         return (
             <div className="flex justify-center items-center min-h-screen">
@@ -105,6 +163,14 @@ export default function HomePage() {
                             onSearch={handleSearch}
                             placeholder="Ask LegalEase anything about your documents..."
                         />
+                        <div className="mt-6">
+                            <button
+                                onClick={toggleUpload}
+                                className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-3 rounded-full text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                            >
+                                Upload New Document
+                            </button>
+                        </div>
                     </div>
                 </div>
 
@@ -118,6 +184,7 @@ export default function HomePage() {
                                 {documentHistory.map((doc) => (
                                     <div
                                         key={doc.id}
+                                        onClick={() => handleDocumentClick(doc.id)}
                                         className="bg-white bg-opacity-95 rounded-xl p-6 border border-gray-200 hover:shadow-xl transition-all duration-300 cursor-pointer backdrop-blur-sm hover:scale-[1.02]"
                                     >
                                         <div className="flex justify-between items-start">
@@ -126,7 +193,13 @@ export default function HomePage() {
                                                 <p className="text-gray-600 mb-1 font-medium">{doc.type}</p>
                                                 <p className="text-gray-500 text-sm">{new Date(doc.date).toLocaleDateString()}</p>
                                             </div>
-                                            <button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-full text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDocumentClick(doc.id);
+                                                }}
+                                                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-full text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
+                                            >
                                                 View Analytics
                                             </button>
                                         </div>
@@ -147,6 +220,7 @@ export default function HomePage() {
                                 {searchResults.map((result) => (
                                     <div
                                         key={result.id}
+                                        onClick={() => handleDocumentClick(result.id)}
                                         className="bg-white bg-opacity-95 rounded-xl p-6 border border-gray-200 hover:shadow-xl transition-all duration-300 cursor-pointer backdrop-blur-sm hover:scale-[1.02]"
                                     >
                                         <div className="flex justify-between items-start">
@@ -154,12 +228,80 @@ export default function HomePage() {
                                                 <h3 className="text-xl font-semibold text-black mb-3">{result.title}</h3>
                                                 <p className="text-gray-600 leading-relaxed">{result.snippet}</p>
                                             </div>
-                                            <button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-full text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 ml-4">
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    handleDocumentClick(result.id);
+                                                }}
+                                                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-full text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105 ml-4"
+                                            >
                                                 View Analytics
                                             </button>
                                         </div>
                                     </div>
                                 ))}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    className={`fixed inset-0 z-20 transition-all duration-300 ease-in-out ${showUpload ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-full pointer-events-none'} bg-gray-900 bg-opacity-95`}
+                >
+                    <div className="h-full overflow-y-auto pt-20 pb-8 flex items-center justify-center">
+                        <div className="max-w-lg mx-auto px-4 w-full">
+                            <div className="bg-white bg-opacity-95 rounded-xl p-8 border border-gray-200 shadow-xl backdrop-blur-sm">
+                                <h2 className="text-2xl font-bold text-black mb-6 text-center">Upload New Document</h2>
+
+                                <div className="mb-6">
+                                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
+                                        <input
+                                            type="file"
+                                            accept=".pdf,.jpg,.jpeg,.png,.txt"
+                                            onChange={handleFileUpload}
+                                            className="hidden"
+                                            id="file-upload"
+                                        />
+                                        <label htmlFor="file-upload" className="cursor-pointer">
+                                            <div className="mb-4">
+                                                <svg className="w-12 h-12 mx-auto text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                                </svg>
+                                            </div>
+                                            <p className="text-gray-600 font-medium mb-2">
+                                                {uploadFile ? uploadFile.name : 'Click to upload or drag and drop'}
+                                            </p>
+                                            <p className="text-sm text-gray-500">PDF, JPEG, PNG, or TXT (max 100MB)</p>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {uploadError && (
+                                    <div className="mb-4 p-3 bg-red-100 border border-red-300 rounded-lg">
+                                        <p className="text-red-700 text-sm">{uploadError}</p>
+                                    </div>
+                                )}
+
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={toggleUpload}
+                                        className="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                                    >
+                                        Cancel
+                                    </button>
+                                    <button
+                                        onClick={submitUpload}
+                                        disabled={!uploadFile || isUploading}
+                                        className="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    >
+                                        {isUploading ? (
+                                            <div className="flex items-center justify-center">
+                                                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                                                Uploading...
+                                            </div>
+                                        ) : 'Upload Document'}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
