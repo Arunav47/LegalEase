@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LegalEase",
-  description: "Your legal document processing assistant",
+  title: "LegalEase AI - Demystify Legal Documents",
+  description: "Transform complex legal documents into clear insights with AI. Get instant summaries, voice explanations, and intelligent Q&A for contracts and legal papers.",
 };
 
 export default function RootLayout({
