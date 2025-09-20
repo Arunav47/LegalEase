@@ -7,7 +7,7 @@ import Threads from "@/app/ui/Threads";
 import ResponsiveSearchBar from "@/app/ui/ResponsiveSearchBar";
 
 export default function HomePage() {
-    const { isLoading, isAuthenticated } = useAuthGuard(true);
+    const { isLoading, isAuthenticated } = useAuthGuard('protected');
     const router = useRouter();
     const [scrollY, setScrollY] = useState(0);
     const [searchQuery, setSearchQuery] = useState("");
@@ -19,17 +19,17 @@ export default function HomePage() {
     const [isUploading, setIsUploading] = useState(false);
 
     const documentHistory = [
-        { id: 1, name: "Employment_Contract_Tech_Corp.pdf", date: "2024-01-15", type: "Contract Analysis" },
-        { id: 2, name: "Non_Disclosure_Agreement_Startup.pdf", date: "2024-01-14", type: "Legal Review" },
-        { id: 3, name: "Lease_Agreement_Commercial.pdf", date: "2024-01-13", type: "Document Summary" },
+        { id: 1, name: "Employment_Contract_Tech_Corp.pdf", date: "2024-01-15", type: "Gemini Analysis" },
+        { id: 2, name: "Non_Disclosure_Agreement_Startup.pdf", date: "2024-01-14", type: "Vertex AI Review" },
+        { id: 3, name: "Lease_Agreement_Commercial.pdf", date: "2024-01-13", type: "Document AI Summary" },
         { id: 4, name: "Partnership_Agreement_LLC.pdf", date: "2024-01-12", type: "Risk Assessment" },
-        { id: 5, name: "Intellectual_Property_License.pdf", date: "2024-01-11", type: "IP Analysis" },
+        { id: 5, name: "Intellectual_Property_License.pdf", date: "2024-01-11", type: "AutoML Analysis" },
     ];
 
     const searchResults = [
-        { id: 1, title: "Contract Termination Clauses", snippet: "AI identified 3 termination clauses with different notice periods. Clause 5.2 requires 30 days notice, while clause 8.1 allows immediate termination for breach..." },
-        { id: 2, title: "Liability Limitations Found", snippet: "Document contains liability caps limiting damages to $50,000. This may be insufficient for your business size. Similar contracts typically include..." },
-        { id: 3, title: "Intellectual Property Rights", snippet: "All work-for-hire clauses transfer IP ownership to the company. Employee retains rights only to pre-existing inventions listed in Exhibit A..." },
+        { id: 1, title: "Contract Termination Clauses", snippet: "Gemini AI identified 3 termination clauses with different notice periods using Google Vertex AI Document Processing. Clause 5.2 requires 30 days notice, while clause 8.1 allows immediate termination for breach..." },
+        { id: 2, title: "Liability Limitations Found", snippet: "Gemini's legal analysis detected liability caps limiting damages to $50,000 via Google Cloud AutoML. This may be insufficient for your business size. Similar contracts typically include..." },
+        { id: 3, title: "Intellectual Property Rights", snippet: "Google's advanced language model analyzed work-for-hire clauses - all IP ownership transfers to the company. Employee retains rights only to pre-existing inventions listed in Exhibit A..." },
     ];
 
     useEffect(() => {
@@ -154,10 +154,10 @@ export default function HomePage() {
                 <div className="flex items-center justify-center h-screen pt-0 mt-[-220px]">
                     <div className="text-center w-full max-w-6xl px-4">
                         <h1 className="text-4xl md:text-6xl font-bold text-gray-800 mb-4">
-                            LegalEase AI
+                            LegalEase × Gemini
                         </h1>
                         <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-                            Demystify complex legal documents with AI. Get instant summaries, voice explanations, mind maps, and intelligent Q&A for contracts, agreements, and legal papers in any language.
+                            Powered by Google's Gemini AI and Vertex AI ecosystem. Transform complex legal documents with instant summaries, Google Text-to-Speech explanations, visual mind maps, and intelligent Q&A using the world's most advanced language model.
                         </p>
                         <ResponsiveSearchBar
                             onSearch={handleSearch}
@@ -168,10 +168,10 @@ export default function HomePage() {
                                 onClick={toggleUpload}
                                 className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-3 rounded-full text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
                             >
-                                📄 Upload Legal Document
+                                Upload Legal Document
                             </button>
                             <p className="text-sm text-gray-500 mt-2">
-                                AI will instantly analyze, summarize & create interactive insights
+                                Gemini will instantly analyze, summarize & create interactive insights using Vertex AI
                             </p>
                         </div>
                     </div>
@@ -182,9 +182,9 @@ export default function HomePage() {
                 >
                     <div className="h-full overflow-y-auto pt-20 pb-8">
                         <div className="max-w-4xl mx-auto px-4">
-                            <h2 className="text-3xl font-bold text-white mb-4 text-center">Your AI-Analyzed Documents</h2>
+                            <h2 className="text-3xl font-bold text-white mb-4 text-center">Your Gemini-Analyzed Documents</h2>
                             <p className="text-center text-gray-300 mb-8">
-                                Each document processed with advanced AI for summaries, risk analysis, and intelligent insights
+                                Each document processed with Google's Gemini AI for summaries, risk analysis, and intelligent insights powered by Vertex AI
                             </p>
                             <div className="grid gap-4">
                                 {documentHistory.map((doc) => (
@@ -260,7 +260,7 @@ export default function HomePage() {
                     <div className="h-full overflow-y-auto pt-20 pb-8 flex items-center justify-center">
                         <div className="max-w-lg mx-auto px-4 w-full">
                             <div className="bg-white bg-opacity-95 rounded-xl p-8 border border-gray-200 shadow-xl backdrop-blur-sm">
-                                <h2 className="text-2xl font-bold text-black mb-6 text-center">Upload New Document</h2>
+                                <h2 className="text-2xl font-bold text-black mb-6 text-center">Upload for Gemini Analysis</h2>
 
                                 <div className="mb-6">
                                     <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center hover:border-blue-400 transition-colors">
