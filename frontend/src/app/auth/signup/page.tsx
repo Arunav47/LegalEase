@@ -19,9 +19,9 @@ export default function SignUpPage() {
         <>
             <div className="flex flex-col justify-center items-center min-h-screen bg-gray-100 pt-20">
                 <div className="mb-8 text-center">
-                    <h1 className="text-3xl font-bold mb-3 text-gray-800">Create Your Account</h1>
+                    <h1 className="text-3xl font-bold mb-3 text-gray-800">Join LegalEase AI Revolution</h1>
                     <span className="text-gray-600 text-lg max-w-md mx-auto block">
-                        Join LegalEase and get your legal documents processed efficiently
+                        Start transforming complex legal documents into clear insights with AI-powered analysis, summaries, and intelligent Q&A
                     </span>
                 </div>
 
