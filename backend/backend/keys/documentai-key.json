@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "legalease-470605",
+  "private_key_id": "3f4c112839cdc049942ea87252e07d2e78a51359",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDXmhd14NzS05W5\nrIv5cTDxTYC73m2DHCssDdaDwcZr27cehzjj/nzsHPUukbLBAgfPf7eANrkmgVra\nVt1b79HiUxTVR68oMO8hWqwPcJYq+NF6lBh9K2q4SSSkhvJw5QOwY0VYraIL/7F6\nr0/bwowAQUGK6aFtMaCvt5yI5aO56xQdww/dIINH0jecl0tZGk9IfZX/WW3KaTDA\njiyIv0M7HcSVcaEOE+aoKnptKkgMryoj1+aVB9X0kS65T64iTXg/IxfDfuxegU2W\nJfdOyVUCNpLrUcvP+3iSon3FBOKUz1Kqgi/7hR5G6L6C6xlXvQEq3udy7ob7hRXx\nz/oE+TxvAgMBAAECggEAHOfVXmH76S4h5EdcauCAmdF0wXtUPmA/74OZb4fCxQIr\nnmWtvG+JqxRE0O4Kw7K0fl7WqNNtZlqwZhaATgusnYXbBK88LgzFerjP2bAUCgXa\n++6wC9QO1k9EIOTQy08A/ByLFxUMZURuNI8di06de4lEMs4Y7O1a6EQbMgVruoip\nSqb0r0t9s45pe6uAJbNiJv92/qxX8jTL+ARN5B7rXqBiu6YKKvka9xOGtEx41PI5\n0Z+Zig0Y4zspbAHlv5O/4UZR/ySlcrdu4GtQ6cYACsY9gyMDdLv0+TGSzo8PW9JG\nJevRstdpUOgS+beHFAcuxiFFkr6RgWnSIRsIXsDYGQKBgQD5GyT7kgZgeCL5CHt1\nwgP11qVMzgcXW949VnrpX34WplbyxZLqLd6XOIBUNiWnrgWmwRY5Re8eB9LgDMCA\nX0Y45OtSV8khLHKd9qEnBvl+EAAh85hNTgEe006JhJtAHVda3ODvytsMjDZRfkjS\nwD1Znz80WIvLjEVjUjOjh/t0qQKBgQDdkZQmFoHYIqUW7C+m4UQCWObAf7ryDuXo\nN5cAbaB2YVwDNd2kRbkqT+g26irzVfaoFiHdCxNUhONZSf+xaWv8Lfg38HZc5GKj\nNzUtIhG4ehQNi8bDQrKrwnzgA1kpLbj4bIlTsROJGmkfxWjXQ1U1rKIVM8I3glK4\n2JhgSLc/VwKBgE0bZ+EvHCY0Sa8IPx7+RTeNj3EsvOkwGKSn5jfixSbBqlxPZ+Bw\n/luUs7RdZl528Wzii7yCtzd2eIG9sMCLvTLTOTwtzCYmmfvnYY6xC/1HeqMHwfb7\n1ED0a3UJxPydmHKZuE7BXfiOVin3ixchRlw9fNT5K5x/+OJ7iVxvNRixAoGBAMrD\nugctG8B23AvhMy6OAhX/05QgkC2Kkr1zef3LVUhgirrpZZ86q1xcag8vNwUfCy4B\nqxXFV/hF8GS7AoMSDd9nFjvjE/6ohtgE4uYdwofHOGi5HLl+ZVIoFu1OQx8bF6ZI\ndVggudcDU2be2rX8iZMoG+A5UKhJ3HgKx0993CzbAoGAAikzl4LvubAYpReCoT1x\nmCeR0+errVrNfSPsZNCuiLKoTXsFghtGg6MxF1NkCdbXeNSE37JMomAwcz7hvcjD\nWfZYobQdZooa/r9ZRaixE/6ab728hAzJ6YYBqMA3VfAbKUPE5uG40aiNDGwpVRWG\nqDEzdBk+yD5WKVLdrW8MsXo=\n-----END PRIVATE KEY-----\n",
+  "client_email": "document-ai-editor@legalease-470605.iam.gserviceaccount.com",
+  "client_id": "109859560405801542728",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/document-ai-editor%40legalease-470605.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
