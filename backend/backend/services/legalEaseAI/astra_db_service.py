@@ -6,13 +6,22 @@ Provides connection and vector operations for legal document analysis
 import os
 import logging
 from typing import List, Dict, Any, Optional
-from astrapy import DataAPIClient
-from astrapy.collection import Collection
 from sentence_transformers import SentenceTransformer
 import asyncio
 from functools import lru_cache
 
 logger = logging.getLogger(__name__)
+
+try:
+    from astrapy import DataAPIClient
+    _ASTRAPY_AVAILABLE = True
+    _ASTRAPY_IMPORT_ERROR = None
+except ModuleNotFoundError as _e:
+    DataAPIClient = None
+    _ASTRAPY_AVAILABLE = False
+    _ASTRAPY_IMPORT_ERROR = _e
+
+_ASTRA_DB_DISABLED = os.getenv("ASTRA_DB_DISABLED", "").strip().lower() in {"1", "true", "yes"}
 
 class AstraDBService:
     """Service for managing Astra DB vector operations"""
@@ -27,6 +36,16 @@ class AstraDBService:
     def _initialize_connection(self):
         """Initialize connection to Astra DB"""
         try:
+            if _ASTRA_DB_DISABLED:
+                logger.warning("Astra DB integration is disabled. Set ASTRA_DB_DISABLED=0 to enable.")
+                return
+            
+            if not _ASTRAPY_AVAILABLE:
+                raise ModuleNotFoundError(
+                    "Missing dependency 'astrapy'. Install with `pip install astrapy` "
+                    "or set ASTRA_DB_DISABLED=1 to disable Astra DB integration."
+                ) from _ASTRAPY_IMPORT_ERROR
+            
             # Get Astra DB credentials from environment
             astra_db_token = os.getenv("ASTRA_DB_APPLICATION_TOKEN")
             astra_db_id = os.getenv("ASTRA_DB_ID")
@@ -88,6 +107,10 @@ class AstraDBService:
             bool: Success status
         """
         try:
+            if _ASTRA_DB_DISABLED:
+                logger.warning("Astra DB integration is disabled. Set ASTRA_DB_DISABLED=0 to enable.")
+                return False
+            
             documents_to_insert = []
             
             for i, chunk in enumerate(chunks):
@@ -134,6 +157,10 @@ class AstraDBService:
             List of matching chunks with scores
         """
         try:
+            if _ASTRA_DB_DISABLED:
+                logger.warning("Astra DB integration is disabled. Set ASTRA_DB_DISABLED=0 to enable.")
+                return []
+            
             # Generate embedding for query
             query_embedding = self.generate_embedding(query)
             
@@ -179,6 +206,10 @@ class AstraDBService:
     async def get_document_chunks(self, document_id: str) -> List[Dict[str, Any]]:
         """Retrieve all chunks for a specific document"""
         try:
+            if _ASTRA_DB_DISABLED:
+                logger.warning("Astra DB integration is disabled. Set ASTRA_DB_DISABLED=0 to enable.")
+                return []
+            
             filter_dict = {"document_id": document_id}
             
             cursor = self.collection.find(filter_dict, sort={"chunk_index": 1})
@@ -203,6 +234,10 @@ class AstraDBService:
     async def delete_document(self, document_id: str) -> bool:
         """Delete all chunks for a specific document"""
         try:
+            if _ASTRA_DB_DISABLED:
+                logger.warning("Astra DB integration is disabled. Set ASTRA_DB_DISABLED=0 to enable.")
+                return False
+            
             filter_dict = {"document_id": document_id}
             result = self.collection.delete_many(filter_dict)
             
@@ -216,6 +251,10 @@ class AstraDBService:
     def get_collection_stats(self) -> Dict[str, Any]:
         """Get statistics about the collection"""
         try:
+            if _ASTRA_DB_DISABLED:
+                logger.warning("Astra DB integration is disabled. Set ASTRA_DB_DISABLED=0 to enable.")
+                return {"total_documents": 0, "total_chunks": 0}
+            
             # Get document count by document_id
             pipeline = [
                 {"$group": {"_id": "$document_id", "chunk_count": {"$sum": 1}}},
