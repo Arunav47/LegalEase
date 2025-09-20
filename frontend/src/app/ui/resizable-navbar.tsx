@@ -29,6 +29,7 @@ interface NavItemsProps {
     }[];
     className?: string;
     onItemClick?: () => void;
+    visible?: boolean;
 }
 
 interface MobileNavProps {
@@ -69,7 +70,7 @@ export const Navbar = ({ children, className }: NavbarProps) => {
         <motion.div
             ref={ref}
             // IMPORTANT: Change this to class of `fixed` if you want the navbar to be fixed
-            className={cn("sticky inset-x-0 top-20 z-40 w-full", className)}
+            className={cn("fixed inset-x-0 top-0 z-40 w-full", className)}
         >
             {React.Children.map(children, (child) =>
                 React.isValidElement(child)
@@ -108,19 +109,27 @@ export const NavBody = ({ children, className, visible }: NavBodyProps) => {
                 className,
             )}
         >
-            {children}
+            {React.Children.map(children, (child) =>
+                React.isValidElement(child)
+                    ? React.cloneElement(
+                        child as React.ReactElement<{ visible?: boolean }>,
+                        { visible },
+                    )
+                    : child,
+            )}
         </motion.div>
     );
 };
 
-export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
+export const NavItems = ({ items, className, onItemClick, visible }: NavItemsProps) => {
     const [hovered, setHovered] = useState<number | null>(null);
 
     return (
         <motion.div
             onMouseLeave={() => setHovered(null)}
             className={cn(
-                "absolute inset-0 hidden flex-1 flex-row items-center justify-center space-x-2 text-base font-medium text-black transition duration-200 hover:text-black lg:flex lg:space-x-2",
+                "absolute inset-0 hidden flex-1 flex-row items-center justify-center space-x-2 text-base font-medium transition duration-200 lg:flex lg:space-x-2",
+                visible ? "text-white hover:text-white" : "text-black hover:text-black",
                 className,
             )}
         >
@@ -128,20 +137,28 @@ export const NavItems = ({ items, className, onItemClick }: NavItemsProps) => {
                 <a
                     onMouseEnter={() => setHovered(idx)}
                     onClick={onItemClick}
-                    className="relative px-4 py-2 text-black text-lg transition-all duration-200"
+                    className={cn(
+                        "relative px-4 py-2 text-lg transition-all duration-200",
+                        visible ? "text-white" : "text-black"
+                    )}
                     key={`link-${idx}`}
                     href={item.link}
                 >
                     {hovered === idx && (
                         <motion.div
                             layoutId="hovered"
-                            className="absolute inset-0 h-full w-full rounded-full bg-black"
+                            className={cn(
+                                "absolute inset-0 h-full w-full rounded-full",
+                                visible ? "bg-white" : "bg-black"
+                            )}
                         />
                     )}
                     <span
                         className={cn(
                             "relative z-20 transition-all duration-200",
-                            hovered === idx ? "text-white" : "text-black"
+                            hovered === idx 
+                                ? (visible ? "text-black" : "text-white") 
+                                : (visible ? "text-white" : "text-black")
                         )}
                     >
                         {item.name}
@@ -237,11 +254,14 @@ export const MobileNavToggle = ({
     );
 };
 
-export const NavbarLogo = () => {
+export const NavbarLogo = ({ visible }: { visible?: boolean }) => {
     return (
         <a
             href="#"
-            className="relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal text-black"
+            className={cn(
+                "relative z-20 mr-4 flex items-center space-x-2 px-2 py-1 text-sm font-normal transition-colors duration-200",
+                visible ? "text-white" : "text-black"
+            )}
         >
             <img
                 src="https://assets.aceternity.com/logo-dark.png"
@@ -249,7 +269,12 @@ export const NavbarLogo = () => {
                 width={30}
                 height={30}
             />
-            <span className="font-medium text-black dark:text-white">Startup</span>
+            <span className={cn(
+                "font-medium transition-colors duration-200",
+                visible ? "text-white" : "text-black dark:text-white"
+            )}>
+                LegalEase
+            </span>
         </a>
     );
 };
