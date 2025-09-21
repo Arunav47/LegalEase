@@ -21,7 +21,7 @@ export default function SignUpPage() {
                 <div className="mb-8 text-center">
                     <h1 className="text-3xl font-bold mb-3 text-gray-800">Join LegalEase × Gemini Revolution</h1>
                     <span className="text-gray-600 text-lg max-w-md mx-auto block">
-                        Start transforming complex legal documents with Google's Gemini AI, Vertex AI Document Processing, and intelligent conversational analysis
+                        Start transforming complex legal documents with Google&apos;s Gemini AI, Vertex AI Document Processing, and intelligent conversational analysis
                     </span>
                 </div>
 

@@ -17,6 +17,7 @@ export default function DocumentPage() {
     const [activeSection, setActiveSection] = useState("overview");
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [sectionLoading, setSectionLoading] = useState<Record<string, boolean>>({});
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [sectionData, setSectionData] = useState<Record<string, any>>({});
     const [chatMessages, setChatMessages] = useState<Array<{ id: number, text: string, sender: 'user' | 'bot', timestamp: Date }>>([
         {
@@ -108,7 +109,9 @@ export default function DocumentPage() {
                     type: "Gemini Deep Analysis",
                     uploadDate: new Date().toISOString().split('T')[0], // or get from statusResult
                     status: "AI Analyzed",
-                    summary: summaryResult.result?.summary || summaryResult.result?.content || 'No summary available',
+                    summary: typeof summaryResult.result?.summary === 'string' ? summaryResult.result.summary : 
+                             typeof summaryResult.result?.content === 'string' ? summaryResult.result.content : 
+                             'No summary available',
                 };
                 
                 setDocumentData(docData);
@@ -419,7 +422,7 @@ export default function DocumentPage() {
                                     <p className="text-gray-700 leading-relaxed text-lg">{documentData?.summary}</p>
                                     <div className="mt-6 p-4 bg-blue-50 rounded-xl border border-blue-200">
                                         <p className="text-sm text-blue-800">
-                                            <strong>Gemini Analysis Complete:</strong> This document has been processed using Google's most advanced language model and Vertex AI Document Processing to extract key insights, identify risks, and highlight important provisions in plain English.
+                                            <strong>Gemini Analysis Complete:</strong> This document has been processed using Google&apos;s most advanced language model and Vertex AI Document Processing to extract key insights, identify risks, and highlight important provisions in plain English.
                                         </p>
                                     </div>
                                 </div>
@@ -435,7 +438,7 @@ export default function DocumentPage() {
                                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Key Clauses Analysis</h2>
                                 <div className="grid gap-6">
                                     {sectionData.clauses && Array.isArray(sectionData.clauses.clauses) ? 
-                                        sectionData.clauses.clauses.map((clause: any, index: number) => (
+                                        sectionData.clauses.clauses.map((clause: { title?: string; clause_text?: string; importance?: string; content?: string; text?: string; source?: string }, index: number) => (
                                             <div key={index} className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
                                                 <div className="flex items-start justify-between mb-4">
                                                     <div className="flex items-center space-x-3">
@@ -475,7 +478,7 @@ export default function DocumentPage() {
                                 <h2 className="text-2xl font-bold text-gray-900 mb-6">Important Dates Timeline</h2>
                                 <div className="space-y-6">
                                     {sectionData.dates && Array.isArray(sectionData.dates.dates) ? 
-                                        sectionData.dates.dates.map((dateItem: any, index: number) => (
+                                        sectionData.dates.dates.map((dateItem: { event?: string; description?: string; date?: string; context?: string }, index: number) => (
                                             <div key={index} className="flex items-center space-x-6 p-4 border border-gray-200 rounded-xl hover:shadow-lg transition-all duration-300">
                                                 <div className="flex-shrink-0">
                                                     <div className={`w-12 h-12 rounded-full flex items-center justify-center text-white font-semibold bg-blue-500`}>
@@ -523,7 +526,7 @@ export default function DocumentPage() {
                                     {sectionData.locations && (
                                         sectionData.locations.entities || sectionData.locations.parties || sectionData.locations
                                     ) ? (
-                                        Object.entries(sectionData.locations.entities || sectionData.locations.parties || sectionData.locations).map(([key, value]: [string, any], index: number) => (
+                                        Object.entries(sectionData.locations.entities || sectionData.locations.parties || sectionData.locations).map(([key, value]: [string, unknown], index: number) => (
                                             <div key={index} className="border border-gray-200 rounded-xl p-6 hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
                                                 <div className="flex items-start space-x-4">
                                                     <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-white bg-purple-500`}>
@@ -570,7 +573,7 @@ export default function DocumentPage() {
                                                 </div>
                                             </div>
                                         ) : Array.isArray(sectionData.breakdown.breakdown) ? (
-                                            sectionData.breakdown.breakdown.map((section: any, index: number) => (
+                                            sectionData.breakdown.breakdown.map((section: { section?: string; title?: string; content?: string; description?: string; text?: string; subsections?: Array<{ title?: string; name?: string } | string> }, index: number) => (
                                                 <div key={index} className="border border-gray-200 rounded-xl p-6">
                                                     <h3 className="text-xl font-semibold text-gray-900 mb-4">
                                                         {section.section || section.title || `Section ${index + 1}`}
@@ -580,7 +583,7 @@ export default function DocumentPage() {
                                                     </p>
                                                     {section.subsections && Array.isArray(section.subsections) && (
                                                         <div className="flex flex-wrap gap-2">
-                                                            {section.subsections.map((subsection: any, subIndex: number) => (
+                                                            {section.subsections.map((subsection: { title?: string; name?: string } | string, subIndex: number) => (
                                                                 <span
                                                                     key={subIndex}
                                                                     className="px-3 py-1 bg-gradient-to-r from-blue-100 to-purple-100 text-gray-700 rounded-full text-sm font-medium"

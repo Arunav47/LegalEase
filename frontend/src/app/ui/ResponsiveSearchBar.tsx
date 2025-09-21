@@ -25,7 +25,12 @@ const ResponsiveSearchBar: React.FC<ResponsiveSearchBarProps> = ({
 
     const handleKeyPress = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
-            handleSubmit(e as any);
+            e.preventDefault();
+            if (query.trim() && onSearch) {
+                setIsLoading(true);
+                onSearch(query);
+                setIsLoading(false);
+            }
         }
     };
 

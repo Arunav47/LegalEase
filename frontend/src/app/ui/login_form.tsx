@@ -30,8 +30,8 @@ export default function LoginForm() {
             await signInWithEmailAndPassword(auth, formData.email, formData.password);
             console.log("Login successful");
             router.replace("/home"); // Use replace to prevent back navigation
-        } catch (err: any) {
-            console.error("Firebase Error:", err.message);
+        } catch (err: unknown) {
+            console.error("Firebase Error:", err instanceof Error ? err.message : String(err));
             setError("Unable to log in. Check email or password.");
         }
     };
