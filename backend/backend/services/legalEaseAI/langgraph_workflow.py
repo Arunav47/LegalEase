@@ -3,6 +3,7 @@ LangGraph Document Analysis Workflow
 Implements a graph-based workflow for legal document analysis with context retrieval
 """
 
+import os
 import logging
 from typing import Dict, Any, List, Optional, TypedDict, Annotated
 from langgraph.graph import StateGraph, START, END
@@ -13,9 +14,11 @@ import json
 import asyncio
 from datetime import datetime
 import re
+from pathlib import Path
 
 from .astra_db_service import get_astra_db_service
 from .document_vectorization_service import get_document_vectorization_service
+from ...settings import settings
 
 logger = logging.getLogger(__name__)
 
@@ -33,13 +36,65 @@ class LegalDocumentAnalysisWorkflow:
     """LangGraph workflow for legal document analysis"""
     
     def __init__(self):
+        # Set up Google credentials
+        self._setup_google_credentials()
+        
         self.astra_db = get_astra_db_service()
         self.vectorization_service = get_document_vectorization_service()
-        self.llm = ChatGoogleGenerativeAI(
-            model="gemini-2.5-flash",
-            temperature=0.1
-        )
+        
+        try:
+            # Initialize with API key if available
+            api_key = os.getenv("GOOGLE_API_KEY") or settings.gemini_api_key
+            
+            if api_key:
+                self.llm = ChatGoogleGenerativeAI(
+                    model="gemini-2.5-flash",
+                    temperature=0.1,
+                    google_api_key=api_key
+                )
+                logger.info("Initialized ChatGoogleGenerativeAI with API key")
+            else:
+                # Try with service account credentials
+                self.llm = ChatGoogleGenerativeAI(
+                    model="gemini-2.5-flash",
+                    temperature=0.1
+                )
+                logger.info("Initialized ChatGoogleGenerativeAI with service account credentials")
+                
+        except Exception as e:
+            logger.error(f"Failed to initialize ChatGoogleGenerativeAI: {e}")
+            # Fallback to a simple LLM or mock for testing
+            self.llm = None
+            
         self.workflow = self._build_workflow()
+    
+    def _setup_google_credentials(self):
+        """Set up Google Cloud credentials"""
+        try:
+            # First, try to use API key from settings
+            if settings.gemini_api_key:
+                os.environ["GOOGLE_API_KEY"] = settings.gemini_api_key
+                logger.info("Set Google API key from settings")
+                return
+                
+            # Check for API key in environment
+            if os.getenv("GOOGLE_API_KEY"):
+                logger.info("Google API key found in environment")
+                return
+            
+            # Fallback to service account file
+            current_dir = Path(__file__).parent.parent.parent
+            key_file_path = current_dir / "keys" / "vertexai-sa-key.json"
+            
+            if key_file_path.exists():
+                os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = str(key_file_path)
+                logger.info(f"Set Google credentials to: {key_file_path}")
+            else:
+                logger.warning(f"Google credentials file not found at: {key_file_path}")
+                logger.warning("Please set GOOGLE_API_KEY environment variable or create the credentials file")
+                
+        except Exception as e:
+            logger.error(f"Error setting up Google credentials: {e}")
     
     def _build_workflow(self) -> StateGraph:
         """Build the LangGraph workflow"""
@@ -118,6 +173,12 @@ class LegalDocumentAnalysisWorkflow:
             analysis_type = state["analysis_type"]
             context_chunks = state["context_chunks"]
             user_question = state.get("user_question", "")
+            
+            # Check if LLM is available
+            if self.llm is None:
+                logger.warning("LLM not available, using fallback analysis")
+                state["analysis_result"] = self._get_fallback_analysis(analysis_type, context_chunks)
+                return state
             
             # Build context string
             context_text = self._build_context_text(context_chunks)
@@ -415,6 +476,103 @@ Be helpful but do not provide legal advice - only extract and explain what is in
                 "error": str(e),
                 "analysis_type": analysis_type,
                 "document_id": document_id
+            }
+    
+    def _get_fallback_analysis(self, analysis_type: str, context_chunks: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """Provide basic fallback analysis when AI service is unavailable"""
+        try:
+            # Basic text processing for fallback analysis
+            if not context_chunks:
+                return {
+                    "error": "No document content available for analysis",
+                    "success": False
+                }
+            
+            # Combine all text content
+            all_text = "\n\n".join([chunk.get("text", "") for chunk in context_chunks])
+            
+            if analysis_type == "clauses":
+                # Basic keyword-based clause detection
+                clauses = []
+                clause_keywords = ["obligation", "liable", "responsibility", "shall", "must", "required", "agree", "covenant"]
+                
+                for chunk in context_chunks:
+                    text = chunk.get("text", "").lower()
+                    for keyword in clause_keywords:
+                        if keyword in text:
+                            clauses.append({
+                                "clause_text": chunk.get("text", "")[:200] + "...",
+                                "clause_type": "general",
+                                "page_number": chunk.get("page_number", 1),
+                                "section": chunk.get("section", "Unknown"),
+                                "significance": f"Contains keyword: {keyword}"
+                            })
+                            break
+                
+                return {
+                    "important_clauses": clauses[:10],
+                    "fallback_mode": True,
+                    "message": "AI service unavailable. Basic keyword-based analysis provided."
+                }
+            
+            elif analysis_type == "dates":
+                # Basic date pattern detection
+                import re
+                dates = []
+                date_patterns = [
+                    r'\b\d{1,2}[-/]\d{1,2}[-/]\d{2,4}\b',
+                    r'\b\d{1,2}\s+\w+\s+\d{2,4}\b',
+                    r'\b(?:January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2},?\s+\d{2,4}\b'
+                ]
+                
+                for chunk in context_chunks:
+                    text = chunk.get("text", "")
+                    for pattern in date_patterns:
+                        matches = re.findall(pattern, text, re.IGNORECASE)
+                        for match in matches:
+                            dates.append({
+                                "date_text": match,
+                                "date_value": match,
+                                "date_type": "general",
+                                "page_number": chunk.get("page_number", 1),
+                                "section": chunk.get("section", "Unknown"),
+                                "context": text[:100] + "..."
+                            })
+                
+                return {
+                    "important_dates": dates[:10],
+                    "fallback_mode": True,
+                    "message": "AI service unavailable. Basic pattern-based date extraction provided."
+                }
+            
+            elif analysis_type == "breakdown":
+                # Basic section breakdown
+                sections = []
+                for i, chunk in enumerate(context_chunks):
+                    sections.append({
+                        "section_title": chunk.get("section", f"Section {i+1}"),
+                        "page_number": chunk.get("page_number", 1),
+                        "content_preview": chunk.get("text", "")[:300] + "...",
+                        "word_count": len(chunk.get("text", "").split())
+                    })
+                
+                return {
+                    "document_breakdown": sections,
+                    "fallback_mode": True,
+                    "message": "AI service unavailable. Basic section breakdown provided."
+                }
+            
+            else:
+                return {
+                    "error": f"Fallback analysis not implemented for type: {analysis_type}",
+                    "available_content": f"Document has {len(context_chunks)} sections available",
+                    "fallback_mode": True
+                }
+                
+        except Exception as e:
+            return {
+                "error": f"Fallback analysis failed: {str(e)}",
+                "fallback_mode": True
             }
 
 # Global instance

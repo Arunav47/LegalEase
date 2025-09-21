@@ -23,9 +23,22 @@ class EnhancedLegalAnalysisService:
     """Enhanced service for legal document analysis with RAG capabilities"""
     
     def __init__(self):
-        self.astra_db = get_astra_db_service() if get_astra_db_service else None
-        self.vectorization_service = get_document_vectorization_service()
-        self.workflow = get_legal_analysis_workflow()
+        try:
+            self.astra_db = get_astra_db_service() if get_astra_db_service else None
+            self.vectorization_service = get_document_vectorization_service()
+            self.workflow = get_legal_analysis_workflow()
+            self.initialized = True
+        except Exception as e:
+            logger.error(f"Failed to initialize LegalAnalysisService: {e}")
+            self.astra_db = None
+            self.vectorization_service = None
+            self.workflow = None
+            self.initialized = False
+            
+    def _check_initialization(self):
+        """Check if service is properly initialized"""
+        if not self.initialized:
+            raise RuntimeError("Legal service initialization error: Service not properly initialized. Please check configuration.")
     
     async def upload_and_process_document(self, file_path: str, document_id: Optional[str] = None) -> Dict[str, Any]:
         """
@@ -39,6 +52,8 @@ class EnhancedLegalAnalysisService:
             Processing results with document ID and statistics
         """
         try:
+            self._check_initialization()
+            
             # Process the document
             doc_id, chunks = await self.vectorization_service.process_document(file_path, document_id)
             
@@ -77,6 +92,7 @@ class EnhancedLegalAnalysisService:
     async def generate_summary(self, document_id: str) -> Dict[str, Any]:
         """Generate a concise document summary"""
         try:
+            self._check_initialization()
             result = await self.workflow.analyze_document(
                 document_id=document_id,
                 analysis_type="summary"
@@ -89,6 +105,7 @@ class EnhancedLegalAnalysisService:
     async def extract_important_clauses(self, document_id: str) -> Dict[str, Any]:
         """Extract important clauses that impact obligations, liabilities, rights, and risks"""
         try:
+            self._check_initialization()
             result = await self.workflow.analyze_document(
                 document_id=document_id,
                 analysis_type="clauses"
@@ -101,6 +118,7 @@ class EnhancedLegalAnalysisService:
     async def extract_important_dates(self, document_id: str) -> Dict[str, Any]:
         """Extract important dates with context"""
         try:
+            self._check_initialization()
             result = await self.workflow.analyze_document(
                 document_id=document_id,
                 analysis_type="dates"
@@ -113,6 +131,7 @@ class EnhancedLegalAnalysisService:
     async def identify_attention_points(self, document_id: str) -> Dict[str, Any]:
         """Identify risks, heavy obligations, and unusual terms"""
         try:
+            self._check_initialization()
             result = await self.workflow.analyze_document(
                 document_id=document_id,
                 analysis_type="risks"
@@ -125,6 +144,7 @@ class EnhancedLegalAnalysisService:
     async def extract_key_entities(self, document_id: str) -> Dict[str, Any]:
         """Extract key people, places, and organizations"""
         try:
+            self._check_initialization()
             result = await self.workflow.analyze_document(
                 document_id=document_id,
                 analysis_type="entities"
@@ -137,6 +157,7 @@ class EnhancedLegalAnalysisService:
     async def generate_detailed_breakdown(self, document_id: str) -> Dict[str, Any]:
         """Generate section-by-section detailed breakdown"""
         try:
+            self._check_initialization()
             result = await self.workflow.analyze_document(
                 document_id=document_id,
                 analysis_type="breakdown"
@@ -149,6 +170,7 @@ class EnhancedLegalAnalysisService:
     async def generate_mind_map(self, document_id: str) -> Dict[str, Any]:
         """Generate Mermaid mind map code for the document"""
         try:
+            self._check_initialization()
             result = await self.workflow.analyze_document(
                 document_id=document_id,
                 analysis_type="mindmap"
@@ -161,6 +183,7 @@ class EnhancedLegalAnalysisService:
     async def chat_about_document(self, document_id: str, question: str) -> Dict[str, Any]:
         """Interactive chat about the document with RAG"""
         try:
+            self._check_initialization()
             result = await self.workflow.analyze_document(
                 document_id=document_id,
                 analysis_type="chat",
@@ -251,5 +274,12 @@ def get_enhanced_legal_service() -> EnhancedLegalAnalysisService:
     """Get or create the global enhanced legal analysis service instance"""
     global enhanced_legal_service
     if enhanced_legal_service is None:
-        enhanced_legal_service = EnhancedLegalAnalysisService()
+        try:
+            enhanced_legal_service = EnhancedLegalAnalysisService()
+            if not enhanced_legal_service.initialized:
+                logger.error("Legal service failed to initialize properly")
+        except Exception as e:
+            logger.error(f"Failed to create legal service: {e}")
+            # Create a minimal service instance that will raise errors
+            enhanced_legal_service = EnhancedLegalAnalysisService()
     return enhanced_legal_service
