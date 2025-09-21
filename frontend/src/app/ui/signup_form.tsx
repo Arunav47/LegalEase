@@ -44,8 +44,8 @@ export default function SignUpForm() {
             console.log("Signup successful");
             await signInWithEmailAndPassword(auth, formData.email, formData.password);
             router.replace("/home"); // Use replace to prevent back navigation
-        } catch (err: any) {
-            console.error("Firebase Error:", err.message);
+        } catch (err: unknown) {
+            console.error("Firebase Error:", err instanceof Error ? err.message : String(err));
             setError("Unable to create account. Please try again.");
         }
     };

@@ -22,7 +22,7 @@ export default function LoginPage() {
                 <div className="mb-8 text-center">
                     <h1 className="text-3xl font-bold mb-3 text-gray-800">Welcome Back to LegalEase × Gemini</h1>
                     <span className="text-gray-600 text-lg max-w-md mx-auto block">
-                        Continue your journey of demystifying legal documents with Google's advanced AI technology
+                        Continue your journey of demystifying legal documents with Google&apos;s advanced AI technology
                     </span>
                 </div>
 

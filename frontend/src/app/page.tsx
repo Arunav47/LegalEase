@@ -32,10 +32,10 @@ export default function FeaturesPage() {
           </h2>
           <div className="col-span-1 md:col-span-8">
             <p className="mb-4 text-xl text-neutral-600 md:text-2xl">
-              Powered by Google's Gemini AI and Vertex AI Document Processing, LegalEase automatically extracts key clauses, identifies risks, and highlights critical provisions. Experience the power of Google's most advanced language model.
+              Powered by Google&apos;s Gemini AI and Vertex AI Document Processing, LegalEase automatically extracts key clauses, identifies risks, and highlights critical provisions. Experience the power of Google&apos;s most advanced language model.
             </p>
             <p className="mb-8 text-xl text-neutral-600 md:text-2xl">
-              Get instant summaries, risk assessments, and actionable insights using Google Vertex AI's Document AI, AutoML, and Translation API for multilingual support.
+              Get instant summaries, risk assessments, and actionable insights using Google Vertex AI&apos;s Document AI, AutoML, and Translation API for multilingual support.
             </p>
             <button
               onClick={handleCTAClick}
@@ -60,7 +60,7 @@ export default function FeaturesPage() {
               Convert document summaries into natural-sounding audio using Google Cloud Text-to-Speech API with WaveNet voices. Perfect for reviewing documents while commuting or multitasking.
             </p>
             <p className="mb-8 text-xl text-neutral-600 md:text-2xl">
-              Ask questions about your documents using Gemini's conversational AI with Vertex AI Search integration. Get instant answers about clauses, obligations, dates, and legal implications.
+              Ask questions about your documents using Gemini&apos;s conversational AI with Vertex AI Search integration. Get instant answers about clauses, obligations, dates, and legal implications.
             </p>
             <button
               onClick={handleCTAClick}
@@ -82,10 +82,10 @@ export default function FeaturesPage() {
           </h2>
           <div className="col-span-1 md:col-span-8">
             <p className="mb-4 text-xl text-neutral-600 md:text-2xl">
-              Process documents in 100+ languages using Google Cloud Translation API and Vertex AI's multilingual capabilities. From English contracts to international agreements, Gemini understands legal documents across all languages.
+              Process documents in 100+ languages using Google Cloud Translation API and Vertex AI&apos;s multilingual capabilities. From English contracts to international agreements, Gemini understands legal documents across all languages.
             </p>
             <p className="mb-8 text-xl text-neutral-600 md:text-2xl">
-              Vertex AI AutoML creates custom visual models for document layout analysis, generating interactive mind maps, timeline views, and relationship charts powered by Google's computer vision.
+              Vertex AI AutoML creates custom visual models for document layout analysis, generating interactive mind maps, timeline views, and relationship charts powered by Google&apos;s computer vision.
             </p>
             <button
               onClick={handleCTAClick}

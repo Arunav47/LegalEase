@@ -3,7 +3,7 @@ export interface DocumentUploadResponse {
   success: boolean;
   document_id?: string;
   message: string;
-  statistics?: Record<string, any>;
+  statistics?: Record<string, unknown>;
   error?: string;
 }
 
@@ -12,7 +12,7 @@ export interface AnalysisResponse {
   document_id: string;
   timestamp: string;
   context_chunks_used: number;
-  result: Record<string, any>;
+  result: Record<string, unknown>;
   error?: string;
 }
 
@@ -24,7 +24,7 @@ export interface ChatRequest {
 export interface ChatResponse {
   answer: string;
   context_used: number;
-  sources: any[];
+  sources: unknown[];
   document_id: string;
   timestamp: string;
 }
@@ -32,7 +32,7 @@ export interface ChatResponse {
 export interface DocumentStatusResponse {
   exists: boolean;
   document_id?: string;
-  statistics?: Record<string, any>;
+  statistics?: Record<string, unknown>;
   chunks_count?: number;
   message?: string;
   error?: string;
@@ -56,8 +56,8 @@ export interface DocumentData {
   importantDates?: ImportantDate[];
   locations?: Location[];
   detailedBreakdown?: DetailedSection[];
-  entities?: any;
-  risks?: any;
+  entities?: unknown;
+  risks?: unknown;
   mindmap?: string;
 }
 

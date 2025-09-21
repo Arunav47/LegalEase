@@ -180,8 +180,8 @@ export default function HomePage() {
                         <h1 className="text-4xl md:text-6xl font-bold text-gray-800 mb-4">
                             LegalEase × Gemini
                         </h1>
-                        <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-16">
-                            Powered by Google's Gemini AI and Vertex AI ecosystem. Transform complex legal documents with instant summaries, Google Text-to-Speech explanations, visual mind maps, and intelligent Q&A using the world's most advanced language model.
+                        <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+                            Powered by Google&apos;s Gemini AI and Vertex AI ecosystem. Transform complex legal documents with instant summaries, Google Text-to-Speech explanations, visual mind maps, and intelligent Q&A using the world&apos;s most advanced language model.
                         </p>
                         <ResponsiveSearchBar
                             onSearch={handleSearch}
@@ -208,7 +208,7 @@ export default function HomePage() {
                         <div className="max-w-4xl mx-auto px-4">
                             <h2 className="text-3xl font-bold text-white mb-4 text-center">Your Gemini-Analyzed Documents</h2>
                             <p className="text-center text-gray-300 mb-8">
-                                Each document processed with Google's Gemini AI for summaries, risk analysis, and intelligent insights powered by Vertex AI
+                                Each document processed with Google&apos;s Gemini AI for summaries, risk analysis, and intelligent insights powered by Vertex AI
                             </p>
                             <div className="grid gap-4">
                                 {documentHistory.map((doc) => (
@@ -247,7 +247,7 @@ export default function HomePage() {
                         <div className="max-w-4xl mx-auto px-4">
                             <h2 className="text-3xl font-bold text-white mb-4 text-center">Smart Search Results</h2>
                             <p className="text-center text-gray-300 mb-8">
-                                AI-powered insights and analysis for: "{searchQuery}"
+                                AI-powered insights and analysis for: &quot;{searchQuery}&quot;
                             </p>
                             <div className="grid gap-4">
                                 {searchResults.map((result) => (
