@@ -168,14 +168,14 @@ export default function HomePage() {
 
     return (
         <div className="min-h-screen relative overflow-hidden">
-            <div className="fixed inset-0 top-40 z-0 will-change-transform">
+            <div className="fixed inset-0 top-0 z-0 will-change-transform">
                 <div className="w-full h-full transform-gpu">
                     <Threads enableMouseInteraction={true} />
                 </div>
             </div>
 
             <div className="relative z-10 min-h-screen">
-                <div className="flex items-center justify-center h-screen pt-0 mt-[-220px]">
+                <div className="flex items-start justify-center min-h-screen pt-16">
                     <div className="text-center w-full max-w-6xl px-4">
                         <h1 className="text-4xl md:text-6xl font-bold text-gray-800 mb-4">
                             LegalEase × Gemini
@@ -187,7 +187,7 @@ export default function HomePage() {
                             onSearch={handleSearch}
                             placeholder="search documents"
                         />
-                        <div className="mt-6">
+                        <div className="mt-20">
                             <button
                                 onClick={toggleUpload}
                                 className="bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-8 py-3 rounded-full text-sm font-medium transition-all duration-200 shadow-lg hover:shadow-xl transform hover:scale-105"
@@ -204,7 +204,7 @@ export default function HomePage() {
                 <div
                     className={`fixed inset-0 z-20 transition-all duration-300 ease-in-out ${showHistory ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-full pointer-events-none'} bg-gray-900 bg-opacity-95`}
                 >
-                    <div className="h-full overflow-y-auto pt-20 pb-8">
+                    <div className="h-full overflow-y-auto pt-28 pb-8">
                         <div className="max-w-4xl mx-auto px-4">
                             <h2 className="text-3xl font-bold text-white mb-4 text-center">Your Gemini-Analyzed Documents</h2>
                             <p className="text-center text-gray-300 mb-8">
@@ -243,7 +243,7 @@ export default function HomePage() {
                 <div
                     className={`fixed inset-0 z-20 transition-all duration-300 ease-in-out ${showResults ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-full pointer-events-none'} bg-gray-900 bg-opacity-95`}
                 >
-                    <div className="h-full overflow-y-auto pt-20 pb-8">
+                    <div className="h-full overflow-y-auto pt-28 pb-8">
                         <div className="max-w-4xl mx-auto px-4">
                             <h2 className="text-3xl font-bold text-white mb-4 text-center">Smart Search Results</h2>
                             <p className="text-center text-gray-300 mb-8">
@@ -281,7 +281,7 @@ export default function HomePage() {
                 <div
                     className={`fixed inset-0 z-20 transition-all duration-300 ease-in-out ${showUpload ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-full pointer-events-none'} bg-gray-900 bg-opacity-95`}
                 >
-                    <div className="h-full overflow-y-auto pt-20 pb-8 flex items-center justify-center">
+                    <div className="h-full overflow-y-auto pt-28 pb-8 flex items-center justify-center">
                         <div className="max-w-lg mx-auto px-4 w-full">
                             <div className="bg-white bg-opacity-95 rounded-xl p-8 border border-gray-200 shadow-xl backdrop-blur-sm">
                                 <h2 className="text-2xl font-bold text-black mb-6 text-center">Upload for Gemini Analysis</h2>

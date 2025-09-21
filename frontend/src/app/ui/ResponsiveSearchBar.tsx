@@ -37,7 +37,7 @@ const ResponsiveSearchBar: React.FC<ResponsiveSearchBarProps> = ({
     return (
         <form onSubmit={handleSubmit}>
             <label
-                className="mx-auto relative bg-white min-w-sm w-full max-w-5xl flex flex-col md:flex-row items-center justify-center border py-2 px-2 rounded-2xl gap-2 shadow-2xl focus-within:border-gray-300"
+                className="mx-auto relative bg-white/30 backdrop-blur-sm min-w-sm w-full max-w-5xl flex flex-col md:flex-row items-center justify-center border border-white/20 py-2 px-2 rounded-2xl gap-2 shadow-2xl focus-within:border-white/40"
                 htmlFor="search-bar"
             >
                 <input
@@ -46,7 +46,7 @@ const ResponsiveSearchBar: React.FC<ResponsiveSearchBarProps> = ({
                     value={query}
                     onChange={(e) => setQuery(e.target.value)}
                     onKeyPress={handleKeyPress}
-                    className="px-6 py-2 w-full rounded-md flex-1 outline-none bg-transparent text-gray-800 placeholder-gray-500 font-medium"
+                    className="px-6 py-2 w-full rounded-md flex-1 outline-none bg-transparent text-gray-800 placeholder-gray-700 font-medium"
                 />
                 <button
                     type="submit"
